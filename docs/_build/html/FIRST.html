@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FIRST &mdash; first  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=eafc0fe6" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="SelectByFIRST" href="SelectByFIRST.html" />
+    <link rel="prev" title="FIRST: Factor Importance Ranking and Selection for Total Indices" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            first
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">FIRST</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#imports">Imports</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#simulate-data">Simulate Data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#run-first">Run FIRST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#speeding-up-first">Speeding Up FIRST</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#parallel-computation">Parallel Computation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#approximate-nearest-neighbor-search">Approximate Nearest-Neighbor Search</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-subsamples">Using Subsamples</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#random-subsamples">Random Subsamples</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#twinning-subsamples">Twinning Subsamples</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#all-the-tricks-together">All the Tricks Together</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="SelectByFIRST.html">SelectByFIRST</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TotalSobolKNN.html">TotalSobolKNN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">first</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">FIRST</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/FIRST.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="first">
+<h1>FIRST<a class="headerlink" href="#first" title="Link to this heading"></a></h1>
+<p>We now demonstrate how to use <code class="docutils literal notranslate"><span class="pre">FIRST</span></code> for factor importance ranking and selection. If you have not installed <code class="docutils literal notranslate"><span class="pre">first</span></code>, please uncomment and run <code class="docutils literal notranslate"><span class="pre">%pip</span> <span class="pre">install</span> <span class="pre">first</span></code> below before proceeding.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># %pip install first</span>
+</pre></div>
+</div>
+</div>
+</div>
+<section id="imports">
+<h2>Imports<a class="headerlink" href="#imports" title="Link to this heading"></a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">first</span> <span class="kn">import</span> <span class="n">FIRST</span>
+<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">make_friedman1</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="simulate-data">
+<h2>Simulate Data<a class="headerlink" href="#simulate-data" title="Link to this heading"></a></h2>
+<p>We simulate noisy data from the Friedman function</p>
+<p>$$
+y = f(X) + \epsilon = 10\sin(\pi X_{1}X_{2}) + 20(X_{3}-0.5)^2 + 10X_{4} + 5X_{5} + \epsilon,
+$$</p>
+<p>where the input <span class="math notranslate nohighlight">\(X\)</span> are independent features uniformly distributed on unit hypercube and <span class="math notranslate nohighlight">\(\epsilon\sim\mathcal{N}(0,1)\)</span> is independent of input <span class="math notranslate nohighlight">\(X\)</span>. Here only the first 5 features are used, and the remaining are independent of <span class="math notranslate nohighlight">\(y\)</span>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">make_friedman1</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">43</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="run-first">
+<h2>Run FIRST<a class="headerlink" href="#run-first" title="Link to this heading"></a></h2>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">FIRST</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([0.2648618 , 0.2387856 , 0.07689935, 0.32580823, 0.0700073 ,
+       0.        , 0.        , 0.        , 0.        , 0.        ])
+</pre></div>
+</div>
+</div>
+</div>
+<p>As expected, <code class="docutils literal notranslate"><span class="pre">FIRST</span></code> identifies the first 5 factors as important, and the remaining are not taking part in the prediction of the response.</p>
+</section>
+<section id="speeding-up-first">
+<h2>Speeding Up FIRST<a class="headerlink" href="#speeding-up-first" title="Link to this heading"></a></h2>
+<section id="parallel-computation">
+<h3>Parallel Computation<a class="headerlink" href="#parallel-computation" title="Link to this heading"></a></h3>
+<p>If multiple processors are available, <code class="docutils literal notranslate"><span class="pre">FIRST</span></code> is supported to run in parallel for acceleration via the argument <code class="docutils literal notranslate"><span class="pre">n_jobs</span></code>.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">FIRST</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([0.2648618 , 0.2387856 , 0.07689935, 0.32580823, 0.0700073 ,
+       0.        , 0.        , 0.        , 0.        , 0.        ])
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="approximate-nearest-neighbor-search">
+<h3>Approximate Nearest-Neighbor Search<a class="headerlink" href="#approximate-nearest-neighbor-search" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">FIRST</span></code> requires many nearest-neighbor searches. Faiss (Douze et al., 2024) is used for efficient nearest-neighbor search, with approximate search (<code class="docutils literal notranslate"><span class="pre">approx_knn=True</span></code>) by the inverted file index (IVF) is also supported in the implementation. IVF reduces the search scope through first clustering data into Voronoi cells.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">FIRST</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">approx_knn</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([0.2648618 , 0.23877103, 0.07689935, 0.32580823, 0.0700073 ,
+       0.        , 0.        , 0.        , 0.        , 0.        ])
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="using-subsamples">
+<h3>Using Subsamples<a class="headerlink" href="#using-subsamples" title="Link to this heading"></a></h3>
+<p>The use of subsamples to accelerate computation of the outer loop expectation is available via the argument <code class="docutils literal notranslate"><span class="pre">n_mc</span></code>. Both random and twinning (Vakayil and Joseph, 2022) subsamples are available, where twinning subsamples could provide better approximation for the full data at a higher computational cost.</p>
+<section id="random-subsamples">
+<h4>Random Subsamples<a class="headerlink" href="#random-subsamples" title="Link to this heading"></a></h4>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">43</span><span class="p">)</span>
+<span class="n">FIRST</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">n_mc</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([0.26479634, 0.23567279, 0.07756636, 0.33297155, 0.064703  ,
+       0.        , 0.        , 0.        , 0.        , 0.        ])
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="twinning-subsamples">
+<h4>Twinning Subsamples<a class="headerlink" href="#twinning-subsamples" title="Link to this heading"></a></h4>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">43</span><span class="p">)</span>
+<span class="n">FIRST</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">n_mc</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">twin_mc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([0.28075163, 0.2553532 , 0.06957491, 0.3351466 , 0.07408396,
+       0.        , 0.        , 0.        , 0.        , 0.        ])
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="all-the-tricks-together">
+<h3>All the Tricks Together<a class="headerlink" href="#all-the-tricks-together" title="Link to this heading"></a></h3>
+<p>Using all the speed-up tricks, we can easily run <code class="docutils literal notranslate"><span class="pre">FIRST</span></code> on dataset with a <em><strong>million</strong></em> instances.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">make_friedman1</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">1000000</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">43</span><span class="p">)</span>
+<span class="n">FIRST</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">n_mc</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">approx_knn</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([0.2912056 , 0.27622156, 0.09099252, 0.34449347, 0.08046853,
+       0.        , 0.        , 0.        , 0.        , 0.        ])
+</pre></div>
+</div>
+</div>
+</div>
+<p>For more details about <code class="docutils literal notranslate"><span class="pre">FIRST</span></code>, please Huang and Joseph (2024).</p>
+</section>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading"></a></h2>
+<p>Huang, C., &amp; Joseph, V. R. (2024). Factor Importance Ranking and Selection using Total Indices. arXiv preprint arXiv:2401.00800.</p>
+<p>Douze, M., Guzhva, A., Deng, C., Johnson, J., Szilvasy, G., Mazaré, P.E., Lomeli, M., Hosseini, L., &amp; Jégou, H., (2024). The Faiss library. arXiv preprint arXiv:2401.08281.</p>
+<p>Vakayil, A., &amp; Joseph, V. R. (2022). Data twinning. Statistical Analysis and Data Mining: The ASA Data Science Journal, 15(5), 598-610.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="FIRST: Factor Importance Ranking and Selection for Total Indices" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="SelectByFIRST.html" class="btn btn-neutral float-right" title="SelectByFIRST" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Chaofan Huang.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FIRST: Factor Importance Ranking and Selection for Total Indices &mdash; first  documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=92fd9be5" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="_static/mystnb.4510f1fc1dee50b3e5859aac5469c37c29e427902b24a333a5f9fcb2f0b3ac41.css" />
+      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=eafc0fe6" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="FIRST" href="FIRST.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            first
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="FIRST.html">FIRST</a></li>
+<li class="toctree-l1"><a class="reference internal" href="SelectByFIRST.html">SelectByFIRST</a></li>
+<li class="toctree-l1"><a class="reference internal" href="TotalSobolKNN.html">TotalSobolKNN</a></li>
+<li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">first</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">FIRST: Factor Importance Ranking and Selection for Total Indices</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="first-factor-importance-ranking-and-selection-for-total-indices">
+<h1>FIRST: Factor Importance Ranking and Selection for Total Indices<a class="headerlink" href="#first-factor-importance-ranking-and-selection-for-total-indices" title="Link to this heading"></a></h1>
+<p>A <code class="docutils literal notranslate"><span class="pre">Python3</span></code> module of FIRST, a model-independent factor importance ranking and selection procedure that is based on total Sobol’ indices (<a class="reference external" href="https://arxiv.org/abs/2401.00800">Huang and Joseph, 2024</a>). This research is supported by U.S. National Science Foundation grants <em>DMS-2310637</em> and <em>DMREF-1921873</em>. The <code class="docutils literal notranslate"><span class="pre">R</span></code> implementation is also available on <a class="reference external" href="https://cran.r-project.org/web/packages/first/index.html">CRAN</a>.</p>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>first
+</pre></div>
+</div>
+</section>
+<section id="usage">
+<h2>Usage<a class="headerlink" href="#usage" title="Link to this heading"></a></h2>
+<section id="factor-importance-ranking-and-selection">
+<h3>Factor Importance Ranking and Selection<a class="headerlink" href="#factor-importance-ranking-and-selection" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">FIRST</span></code> is the main function of this module. It provides factor importance ranking and selection directly from scattered data without any model fitting, where the importance is computed based on total Sobol’ indices (<a class="reference external" href="https://www.sciencedirect.com/science/article/pii/S0378475400002706">Sobol’, 2001</a>). <code class="docutils literal notranslate"><span class="pre">FIRST</span></code> requires the following two arguments:</p>
+<ul class="simple">
+<li><p>a numpy ndarray or a pandas dataframe for the factors/predictors <code class="docutils literal notranslate"><span class="pre">X</span></code></p></li>
+<li><p>a numpy ndarray or a pandas series for the response <code class="docutils literal notranslate"><span class="pre">y</span></code></p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">FIRST</span></code> returns a numpy ndarray for the factor importance, with value of <em>zero</em> indicating that the factor is not important to the prediction of the response.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">first</span> <span class="kn">import</span> <span class="n">FIRST</span>
+<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">make_friedman1</span>
+
+<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">make_friedman1</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">43</span><span class="p">)</span>
+
+<span class="n">FIRST</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For more advanced usages of <code class="docutils literal notranslate"><span class="pre">FIRST</span></code>, e.g., speeding up for big data, please see <a class="reference external" href="https://first-huang.readthedocs.io/">documentation</a> or <a class="reference external" href="https://colab.research.google.com/github/BillHuang01/first/blob/main/docs/FIRST.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a>.</p>
+<p>To support an easy integration with <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.pipeline.Pipeline.html">sklearn.pipeline.Pipeline</a> for a streamline model training process, we also provide <code class="docutils literal notranslate"><span class="pre">SelectByFIRST</span></code>, a class that is built from <a class="reference external" href="https://scikit-learn.org/stable/modules/feature_selection.html">sklearn.feature_selection</a>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">first</span> <span class="kn">import</span> <span class="n">SelectByFIRST</span>
+<span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="kn">import</span> <span class="n">Pipeline</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
+<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_california_housing</span>
+
+<span class="n">housing</span> <span class="o">=</span> <span class="n">fetch_california_housing</span><span class="p">()</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">housing</span><span class="o">.</span><span class="n">data</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">housing</span><span class="o">.</span><span class="n">target</span><span class="p">)</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">43</span><span class="p">)</span>
+
+<span class="n">pipe</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
+    <span class="p">(</span><span class="s1">&#39;selector&#39;</span><span class="p">,</span> <span class="n">SelectByFIRST</span><span class="p">(</span><span class="n">regression</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">random_state</span><span class="o">=</span><span class="mi">43</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s1">&#39;estimator&#39;</span><span class="p">,</span> <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">43</span><span class="p">))</span>
+<span class="p">])</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+
+<span class="n">pipe</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For more details, please <a class="reference external" href="https://first-huang.readthedocs.io/">documentation</a> or <a class="reference external" href="https://colab.research.google.com/github/BillHuang01/first/blob/main/docs/SelectByFIRST.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a>.</p>
+</section>
+<section id="total-sobol-indices-estimation">
+<h3>Total Sobol’ Indices Estimation<a class="headerlink" href="#total-sobol-indices-estimation" title="Link to this heading"></a></h3>
+<p>This module also provides the function <code class="docutils literal notranslate"><span class="pre">TotalSobolKNN</span></code> for a consistent estimation of total Sobol’ indices (<a class="reference external" href="https://www.sciencedirect.com/science/article/pii/S0378475400002706">Sobol’, 2001</a>) directly from scattered data. When the response is noiseless, <code class="docutils literal notranslate"><span class="pre">TotalSobolKNN</span></code> implements the Nearest-Neighbor estimator from <a class="reference external" href="https://epubs.siam.org/doi/10.1137/18M1234631">Broto et al. (2020)</a>. For noisy response, <code class="docutils literal notranslate"><span class="pre">TotalSobolKNN</span></code> implements the Noise-Adjusted Nearest-Neighbor estimator from <a class="reference external" href="https://arxiv.org/abs/2401.00800">Huang and Joseph (2024)</a>. <code class="docutils literal notranslate"><span class="pre">TotalSobolKNN</span></code> returns a numpy ndarray for the total Sobol’ indices estimation.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">first</span> <span class="kn">import</span> <span class="n">TotalSobolKNN</span>
+<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">make_friedman1</span>
+
+<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">make_friedman1</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">43</span><span class="p">)</span>
+
+<span class="n">TotalSobolKNN</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For more details and applications, please see <a class="reference external" href="https://first-huang.readthedocs.io/">documentation</a> or <a class="reference external" href="https://colab.research.google.com/github/BillHuang01/first/blob/main/docs/TotalSobolKNN.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a>.</p>
+</section>
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Link to this heading"></a></h2>
+<p>Huang, C., &amp; Joseph, V. R. (2024). Factor Importance Ranking and Selection using Total Indices. arXiv preprint arXiv:2401.00800.</p>
+<p>Sobol’, I. M. (2001). Global sensitivity indices for nonlinear mathematical models and their Monte Carlo estimates. Mathematics and computers in simulation, 55(1-3), 271-280.</p>
+<p>Broto, B., Bachoc, F., &amp; Depecker, M. (2020). Variance reduction for estimation of Shapley effects and adaptation to unknown input distribution. SIAM/ASA Journal on Uncertainty Quantification, 8(2), 693-716.</p>
+</section>
+<section id="citation">
+<h2>Citation<a class="headerlink" href="#citation" title="Link to this heading"></a></h2>
+<p>If you find this module useful, please consider citing</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@article</span><span class="p">{</span><span class="n">huang2024factor</span><span class="p">,</span>
+  <span class="n">title</span><span class="o">=</span><span class="p">{</span><span class="n">Factor</span> <span class="n">Importance</span> <span class="n">Ranking</span> <span class="ow">and</span> <span class="n">Selection</span> <span class="n">using</span> <span class="n">Total</span> <span class="n">Indices</span><span class="p">},</span>
+  <span class="n">author</span><span class="o">=</span><span class="p">{</span><span class="n">Huang</span><span class="p">,</span> <span class="n">Chaofan</span> <span class="ow">and</span> <span class="n">Joseph</span><span class="p">,</span> <span class="n">V</span> <span class="n">Roshan</span><span class="p">},</span>
+  <span class="n">journal</span><span class="o">=</span><span class="p">{</span><span class="n">arXiv</span> <span class="n">preprint</span> <span class="n">arXiv</span><span class="p">:</span><span class="mf">2401.00800</span><span class="p">},</span>
+  <span class="n">year</span><span class="o">=</span><span class="p">{</span><span class="mi">2024</span><span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="FIRST.html" class="btn btn-neutral float-right" title="FIRST" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Chaofan Huang.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
