@@ -8,6 +8,12 @@ A ``Python3`` module of FIRST, a model-independent factor importance ranking and
 pip install first
 ```
 
+or from source
+
+```bash
+pip install git+https://github.com/BillHuang01/first.git
+```
+
 ## Usage
 
 ### Factor Importance Ranking and Selection
