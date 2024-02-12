@@ -26,7 +26,7 @@ X, y = make_friedman1(n_samples=10000, n_features=10, noise=1.0, random_state=43
 
 FIRST(X, y)
 ```
-For more advanced usages of ``FIRST``, e.g., speeding up for big data, please see [documentation][10] or [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)][7].
+For more advanced usages of ``FIRST``, e.g., speeding up for big data, please see [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)][7] or [API documentation][10].
 
 To support an easy integration with [sklearn.pipeline.Pipeline][3] for a streamline model training process, we also provide ``SelectByFIRST``, a class that is built from [sklearn.feature_selection][4].
 
@@ -50,7 +50,7 @@ pipe = Pipeline([
 
 pipe.predict(X_test)
 ```
-For more details, please [documentation][10] or [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)][8]. 
+For more details, please see [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)][8] or [API documentation][11]. 
 
 ### Total Sobol' Indices Estimation
 
@@ -64,7 +64,7 @@ X, y = make_friedman1(n_samples=10000, n_features=5, noise=1.0, random_state=43)
 
 TotalSobolKNN(X, y, noise=True)
 ```
-For more details and applications, please see [documentation][10] or [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)][9]. 
+For more details and applications, please see [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)][9] or [API documentation][12]. 
 
 ## References
 
@@ -97,4 +97,6 @@ If you find this module useful, please consider citing
 [7]: https://colab.research.google.com/github/BillHuang01/first/blob/main/docs/FIRST.ipynb
 [8]: https://colab.research.google.com/github/BillHuang01/first/blob/main/docs/SelectByFIRST.ipynb
 [9]: https://colab.research.google.com/github/BillHuang01/first/blob/main/docs/TotalSobolKNN.ipynb
-[10]: https://first-huang.readthedocs.io/
+[10]: https://first-huang.readthedocs.io/en/latest/autoapi/first/index.html#first.FIRST
+[11]: https://first-huang.readthedocs.io/en/latest/autoapi/first/index.html#first.SelectByFIRST
+[12]: https://first-huang.readthedocs.io/en/latest/autoapi/first/index.html#first.TotalSobolKNN
