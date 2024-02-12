@@ -72,6 +72,8 @@ TotalSobolKNN(X, y, noise=True)
 ```
 For more details and applications, please see [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)][9] or [API documentation][12]. 
 
+A documentation of this module is also available on [Read the Docs][13].
+
 ## References
 
 Huang, C., & Joseph, V. R. (2024). Factor Importance Ranking and Selection using Total Indices. arXiv preprint arXiv:2401.00800.
@@ -106,3 +108,4 @@ If you find this module useful, please consider citing
 [10]: https://first-huang.readthedocs.io/en/latest/autoapi/first/index.html#first.FIRST
 [11]: https://first-huang.readthedocs.io/en/latest/autoapi/first/index.html#first.SelectByFIRST
 [12]: https://first-huang.readthedocs.io/en/latest/autoapi/first/index.html#first.TotalSobolKNN
+[13]: https://first-huang.readthedocs.io/
