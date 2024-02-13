@@ -87,10 +87,10 @@
              
   <section id="selectbyfirst">
 <h1>SelectByFIRST<a class="headerlink" href="#selectbyfirst" title="Link to this heading"></a></h1>
-<p>We now demonstrate how to use FIRST for factor selection within the <code class="docutils literal notranslate"><span class="pre">sklearn.pipeline.Pipeline</span></code> via <code class="docutils literal notranslate"><span class="pre">SelectByFIRST</span></code> class. If you have not installed <code class="docutils literal notranslate"><span class="pre">first</span></code>, please uncomment and run <code class="docutils literal notranslate"><span class="pre">%pip</span> <span class="pre">install</span> <span class="pre">first</span></code> below before proceeding.</p>
+<p>We now demonstrate how to use FIRST for factor selection within the <code class="docutils literal notranslate"><span class="pre">sklearn.pipeline.Pipeline</span></code> via <code class="docutils literal notranslate"><span class="pre">SelectByFIRST</span></code> class. If you have not installed <code class="docutils literal notranslate"><span class="pre">pyfirst</span></code>, please uncomment and run <code class="docutils literal notranslate"><span class="pre">%pip</span> <span class="pre">install</span> <span class="pre">pyfirst</span></code> below before proceeding.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># %pip install first</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># %pip install pyfirst</span>
 </pre></div>
 </div>
 </div>
@@ -100,7 +100,7 @@
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">first</span> <span class="kn">import</span> <span class="n">SelectByFIRST</span>
+<span class="kn">from</span> <span class="nn">pyfirst</span> <span class="kn">import</span> <span class="n">SelectByFIRST</span>
 <span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="kn">import</span> <span class="n">Pipeline</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
 <span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>

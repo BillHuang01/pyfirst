@@ -82,11 +82,11 @@
 <p>A <code class="docutils literal notranslate"><span class="pre">Python3</span></code> module of FIRST, a model-independent factor importance ranking and selection procedure that is based on total Sobol’ indices (<a class="reference external" href="https://arxiv.org/abs/2401.00800">Huang and Joseph, 2024</a>). This research is supported by U.S. National Science Foundation grants <em>DMS-2310637</em> and <em>DMREF-1921873</em>. The <code class="docutils literal notranslate"><span class="pre">R</span></code> implementation is also available on <a class="reference external" href="https://cran.r-project.org/web/packages/first/index.html">CRAN</a>.</p>
 <section id="installation">
 <h2>Installation<a class="headerlink" href="#installation" title="Link to this heading"></a></h2>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>first
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>pyfirst
 </pre></div>
 </div>
 <p>or from source</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>git+https://github.com/BillHuang01/first.git
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>git+https://github.com/BillHuang01/pyfirst.git
 </pre></div>
 </div>
 </section>
@@ -100,7 +100,7 @@
 <li><p>a numpy ndarray or a pandas series for the response <code class="docutils literal notranslate"><span class="pre">y</span></code></p></li>
 </ul>
 <p><code class="docutils literal notranslate"><span class="pre">FIRST</span></code> returns a numpy ndarray for the factor importance, with value of <em>zero</em> indicating that the factor is not important to the prediction of the response.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">first</span> <span class="kn">import</span> <span class="n">FIRST</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyfirst</span> <span class="kn">import</span> <span class="n">FIRST</span>
 <span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">make_friedman1</span>
 
 <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">make_friedman1</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">43</span><span class="p">)</span>
@@ -108,10 +108,10 @@
 <span class="n">FIRST</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>For more advanced usages of <code class="docutils literal notranslate"><span class="pre">FIRST</span></code>, e.g., speeding up for big data, please see <a class="reference external" href="https://colab.research.google.com/github/BillHuang01/first/blob/main/docs/FIRST.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a> or <a class="reference external" href="https://first-huang.readthedocs.io/en/latest/autoapi/first/index.html#first.FIRST">API documentation</a>.</p>
+<p>For more advanced usages of <code class="docutils literal notranslate"><span class="pre">FIRST</span></code>, e.g., speeding up for big data, please see <a class="reference external" href="https://colab.research.google.com/github/BillHuang01/pyfirst/blob/main/docs/FIRST.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a> or <a class="reference external" href="https://pyfirst.readthedocs.io/en/latest/autoapi/pyfirst/index.html#pyfirst.FIRST">API documentation</a>.</p>
 <p>To support an easy integration with <a class="reference external" href="https://scikit-learn.org/stable/modules/generated/sklearn.pipeline.Pipeline.html">sklearn.pipeline.Pipeline</a> for a streamline model training process, we also provide <code class="docutils literal notranslate"><span class="pre">SelectByFIRST</span></code>, a class that is built from <a class="reference external" href="https://scikit-learn.org/stable/modules/feature_selection.html">sklearn.feature_selection</a>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">first</span> <span class="kn">import</span> <span class="n">SelectByFIRST</span>
+<span class="kn">from</span> <span class="nn">pyfirst</span> <span class="kn">import</span> <span class="n">SelectByFIRST</span>
 <span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="kn">import</span> <span class="n">Pipeline</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
 <span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
@@ -130,12 +130,12 @@
 <span class="n">pipe</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">X_test</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>For more details, please see <a class="reference external" href="https://colab.research.google.com/github/BillHuang01/first/blob/main/docs/SelectByFIRST.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a> or <a class="reference external" href="https://first-huang.readthedocs.io/en/latest/autoapi/first/index.html#first.SelectByFIRST">API documentation</a>.</p>
+<p>For more details, please see <a class="reference external" href="https://colab.research.google.com/github/BillHuang01/pyfirst/blob/main/docs/SelectByFIRST.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a> or <a class="reference external" href="https://pyfirst.readthedocs.io/en/latest/autoapi/pyfirst/index.html#pyfirst.SelectByFIRST">API documentation</a>.</p>
 </section>
 <section id="total-sobol-indices-estimation">
 <h3>Total Sobol’ Indices Estimation<a class="headerlink" href="#total-sobol-indices-estimation" title="Link to this heading"></a></h3>
 <p>This module also provides the function <code class="docutils literal notranslate"><span class="pre">TotalSobolKNN</span></code> for a consistent estimation of total Sobol’ indices (<a class="reference external" href="https://www.sciencedirect.com/science/article/pii/S0378475400002706">Sobol’, 2001</a>) directly from scattered data. When the response is noiseless, <code class="docutils literal notranslate"><span class="pre">TotalSobolKNN</span></code> implements the Nearest-Neighbor estimator from <a class="reference external" href="https://epubs.siam.org/doi/10.1137/18M1234631">Broto et al. (2020)</a>. For noisy response, <code class="docutils literal notranslate"><span class="pre">TotalSobolKNN</span></code> implements the Noise-Adjusted Nearest-Neighbor estimator from <a class="reference external" href="https://arxiv.org/abs/2401.00800">Huang and Joseph (2024)</a>. <code class="docutils literal notranslate"><span class="pre">TotalSobolKNN</span></code> returns a numpy ndarray for the total Sobol’ indices estimation.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">first</span> <span class="kn">import</span> <span class="n">TotalSobolKNN</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pyfirst</span> <span class="kn">import</span> <span class="n">TotalSobolKNN</span>
 <span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">make_friedman1</span>
 
 <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">make_friedman1</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">43</span><span class="p">)</span>
@@ -143,7 +143,8 @@
 <span class="n">TotalSobolKNN</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>For more details and applications, please see <a class="reference external" href="https://colab.research.google.com/github/BillHuang01/first/blob/main/docs/TotalSobolKNN.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a> or <a class="reference external" href="https://first-huang.readthedocs.io/en/latest/autoapi/first/index.html#first.TotalSobolKNN">API documentation</a>.</p>
+<p>For more details and applications, please see <a class="reference external" href="https://colab.research.google.com/github/BillHuang01/pyfirst/blob/main/docs/TotalSobolKNN.ipynb"><img alt="Open In Colab" src="https://colab.research.google.com/assets/colab-badge.svg" /></a> or <a class="reference external" href="https://pyfirst.readthedocs.io/en/latest/autoapi/pyfirst/index.html#pyfirst.TotalSobolKNN">API documentation</a>.</p>
+<p>A documentation of this module is also available on <a class="reference external" href="https://pyfirst.readthedocs.io/">Read the Docs</a>.</p>
 </section>
 </section>
 <section id="references">

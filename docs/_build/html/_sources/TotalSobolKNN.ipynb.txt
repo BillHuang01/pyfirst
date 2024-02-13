@@ -6,7 +6,7 @@
    "source": [
     "# TotalSobolKNN\n",
     "\n",
-    "We now demonstrate how to use `TotalSobolKNN` for estimating Total Sobol' indices (Sobol', 2001) from scattered data. If you have not installed `first`, please uncomment and run `%pip install first` below before proceeding. "
+    "We now demonstrate how to use `TotalSobolKNN` for estimating Total Sobol' indices (Sobol', 2001) from scattered data. If you have not installed `pyfirst`, please uncomment and run `%pip install pyfirst` below before proceeding. "
    ]
   },
   {
@@ -15,7 +15,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "# %pip install first"
+    "# %pip install pyfirst"
    ]
   },
   {
@@ -32,7 +32,7 @@
    "outputs": [],
    "source": [
     "import numpy as np\n",
-    "from first import TotalSobolKNN"
+    "from pyfirst import TotalSobolKNN"
    ]
   },
   {

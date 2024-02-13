@@ -5,13 +5,13 @@ A ``Python3`` module of FIRST, a model-independent factor importance ranking and
 ## Installation
 
 ```bash
-pip install first
+pip install pyfirst
 ```
 
 or from source
 
 ```bash
-pip install git+https://github.com/BillHuang01/first.git
+pip install git+https://github.com/BillHuang01/pyfirst.git
 ```
 
 ## Usage
@@ -25,7 +25,7 @@ pip install git+https://github.com/BillHuang01/first.git
 ``FIRST`` returns a numpy ndarray for the factor importance, with value of *zero* indicating that the factor is not important to the prediction of the response.   
 
 ```python
-from first import FIRST
+from pyfirst import FIRST
 from sklearn.datasets import make_friedman1
 
 X, y = make_friedman1(n_samples=10000, n_features=10, noise=1.0, random_state=43)
@@ -38,7 +38,7 @@ To support an easy integration with [sklearn.pipeline.Pipeline][3] for a streaml
 
 ```python
 import numpy as np
-from first import SelectByFIRST
+from pyfirst import SelectByFIRST
 from sklearn.pipeline import Pipeline
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
@@ -63,7 +63,7 @@ For more details, please see [![Open In Colab](https://colab.research.google.com
 This module also provides the function ``TotalSobolKNN`` for a consistent estimation of total Sobol' indices ([Sobol', 2001][5]) directly from scattered data. When the response is noiseless, ``TotalSobolKNN`` implements the Nearest-Neighbor estimator from [Broto et al. (2020)][6]. For noisy response, ``TotalSobolKNN`` implements the Noise-Adjusted Nearest-Neighbor estimator from [Huang and Joseph (2024)][1]. ``TotalSobolKNN`` returns a numpy ndarray for the total Sobol' indices estimation.
 
 ```python
-from first import TotalSobolKNN
+from pyfirst import TotalSobolKNN
 from sklearn.datasets import make_friedman1
 
 X, y = make_friedman1(n_samples=10000, n_features=5, noise=1.0, random_state=43)
@@ -102,10 +102,10 @@ If you find this module useful, please consider citing
 [4]: https://scikit-learn.org/stable/modules/feature_selection.html
 [5]: https://www.sciencedirect.com/science/article/pii/S0378475400002706
 [6]: https://epubs.siam.org/doi/10.1137/18M1234631
-[7]: https://colab.research.google.com/github/BillHuang01/first/blob/main/docs/FIRST.ipynb
-[8]: https://colab.research.google.com/github/BillHuang01/first/blob/main/docs/SelectByFIRST.ipynb
-[9]: https://colab.research.google.com/github/BillHuang01/first/blob/main/docs/TotalSobolKNN.ipynb
-[10]: https://first-huang.readthedocs.io/en/latest/autoapi/first/index.html#first.FIRST
-[11]: https://first-huang.readthedocs.io/en/latest/autoapi/first/index.html#first.SelectByFIRST
-[12]: https://first-huang.readthedocs.io/en/latest/autoapi/first/index.html#first.TotalSobolKNN
-[13]: https://first-huang.readthedocs.io/
+[7]: https://colab.research.google.com/github/BillHuang01/pyfirst/blob/main/docs/FIRST.ipynb
+[8]: https://colab.research.google.com/github/BillHuang01/pyfirst/blob/main/docs/SelectByFIRST.ipynb
+[9]: https://colab.research.google.com/github/BillHuang01/pyfirst/blob/main/docs/TotalSobolKNN.ipynb
+[10]: https://pyfirst.readthedocs.io/en/latest/autoapi/pyfirst/index.html#pyfirst.FIRST
+[11]: https://pyfirst.readthedocs.io/en/latest/autoapi/pyfirst/index.html#pyfirst.SelectByFIRST
+[12]: https://pyfirst.readthedocs.io/en/latest/autoapi/pyfirst/index.html#pyfirst.TotalSobolKNN
+[13]: https://pyfirst.readthedocs.io/

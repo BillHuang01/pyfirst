@@ -6,7 +6,7 @@
    "source": [
     "# SelectByFIRST\n",
     "\n",
-    "We now demonstrate how to use FIRST for factor selection within the `sklearn.pipeline.Pipeline` via `SelectByFIRST` class. If you have not installed `first`, please uncomment and run `%pip install first` below before proceeding. "
+    "We now demonstrate how to use FIRST for factor selection within the `sklearn.pipeline.Pipeline` via `SelectByFIRST` class. If you have not installed `pyfirst`, please uncomment and run `%pip install pyfirst` below before proceeding. "
    ]
   },
   {
@@ -15,7 +15,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "# %pip install first"
+    "# %pip install pyfirst"
    ]
   },
   {
@@ -32,7 +32,7 @@
    "outputs": [],
    "source": [
     "import numpy as np\n",
-    "from first import SelectByFIRST\n",
+    "from pyfirst import SelectByFIRST\n",
     "from sklearn.pipeline import Pipeline\n",
     "from sklearn.ensemble import RandomForestRegressor\n",
     "from sklearn.model_selection import train_test_split\n",

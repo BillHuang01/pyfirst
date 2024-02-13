@@ -6,7 +6,7 @@
    "source": [
     "# FIRST\n",
     "\n",
-    "We now demonstrate how to use `FIRST` for factor importance ranking and selection. If you have not installed `first`, please uncomment and run `%pip install first` below before proceeding. "
+    "We now demonstrate how to use `FIRST` for factor importance ranking and selection. If you have not installed `pyfirst`, please uncomment and run `%pip install pyfirst` below before proceeding. "
    ]
   },
   {
@@ -15,7 +15,7 @@
    "metadata": {},
    "outputs": [],
    "source": [
-    "# %pip install first"
+    "# %pip install pyfirst"
    ]
   },
   {
@@ -32,7 +32,7 @@
    "outputs": [],
    "source": [
     "import numpy as np\n",
-    "from first import FIRST\n",
+    "from pyfirst import FIRST\n",
     "from sklearn.datasets import make_friedman1"
    ]
   },

@@ -1,14 +1,14 @@
 [tool.poetry]
-name = "first"
+name = "pyfirst"
 version = "0.1.0"
 description = "Factor Importance Ranking and Selection using Total Indices"
 authors = ["Chaofan Huang <chuang397@gatech.edu>", "V. Roshan Joseph <roshan@gatech.edu>"]
 maintainers = ["Chaofan Huang <chuang397@gatech.edu>"]
 license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/BillHuang01/first"
-repository = "https://github.com/BillHuang01/first.git"
-documentation = "https://first-huang.readthedocs.io/"
+homepage = "https://github.com/BillHuang01/pyfirst"
+repository = "https://github.com/BillHuang01/pyfirst.git"
+documentation = "https://pyfirst.readthedocs.io/"
 classifiers = [
     "Operating System :: OS Independent",
     "License :: OSI Approved :: MIT License",

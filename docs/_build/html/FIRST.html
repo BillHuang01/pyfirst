@@ -98,10 +98,10 @@
              
   <section id="first">
 <h1>FIRST<a class="headerlink" href="#first" title="Link to this heading"></a></h1>
-<p>We now demonstrate how to use <code class="docutils literal notranslate"><span class="pre">FIRST</span></code> for factor importance ranking and selection. If you have not installed <code class="docutils literal notranslate"><span class="pre">first</span></code>, please uncomment and run <code class="docutils literal notranslate"><span class="pre">%pip</span> <span class="pre">install</span> <span class="pre">first</span></code> below before proceeding.</p>
+<p>We now demonstrate how to use <code class="docutils literal notranslate"><span class="pre">FIRST</span></code> for factor importance ranking and selection. If you have not installed <code class="docutils literal notranslate"><span class="pre">pyfirst</span></code>, please uncomment and run <code class="docutils literal notranslate"><span class="pre">%pip</span> <span class="pre">install</span> <span class="pre">pyfirst</span></code> below before proceeding.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># %pip install first</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># %pip install pyfirst</span>
 </pre></div>
 </div>
 </div>
@@ -111,7 +111,7 @@
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">first</span> <span class="kn">import</span> <span class="n">FIRST</span>
+<span class="kn">from</span> <span class="nn">pyfirst</span> <span class="kn">import</span> <span class="n">FIRST</span>
 <span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">make_friedman1</span>
 </pre></div>
 </div>
@@ -235,7 +235,7 @@ $$</p>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([0.29068548, 0.28273848, 0.09539479, 0.34739095, 0.07908793,
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([0.29201721, 0.27572069, 0.08616267, 0.36656964, 0.09175178,
        0.        , 0.        , 0.        , 0.        , 0.        ])
 </pre></div>
 </div>
