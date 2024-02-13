@@ -441,6 +441,7 @@ def FIRST(
     for t in range(n_forward):
         if verbose:
             print(f"\nPhase-{(t+1):d} Forward Selection...")
+        none_added_to_subset = True
         candidate = [i for i in range(p) if i not in subset]
         while len(candidate) > 0:
             # compute total Sobol' effect for -x (x for current subset)
@@ -467,8 +468,15 @@ def FIRST(
                 candidate = [candidate[i] for i in range(len(candidate)) if x_var[i] > x_var_max]
                 candidate.remove(add_ind)
                 subset.append(add_ind)
+                none_added_to_subset = False
                 x_var_max = x_var.max()
+                if verbose:
+                    print(f"add candidate {add_ind:d}({x_var_max:.3f}).")
             else:
+                break
+        if none_added_to_subset:
+            if verbose:
+                print("early termination since none of the candidates can be added in this phase.")
                 break
     
     # backward elimination
@@ -498,7 +506,9 @@ def FIRST(
             # find the index to remove such that the variance explained is maximized
             remove_ind = subset[np.argmax(x_var)]
             subset.remove(remove_ind)
-            x_var_max = x_var.max() 
+            x_var_max = x_var.max()
+            if verbose:
+                print(f"remove candidate {remove_ind:d}({x_var_max:.3f}).") 
         else:
             break
 
