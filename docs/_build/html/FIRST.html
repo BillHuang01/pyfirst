@@ -52,6 +52,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#imports">Imports</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#simulate-data">Simulate Data</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#run-first">Run FIRST</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#choice-for-forward-selection">Choice for Forward Selection</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#speeding-up-first">Speeding Up FIRST</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#parallel-computation">Parallel Computation</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#approximate-nearest-neighbor-search">Approximate Nearest-Neighbor Search</a></li>
@@ -150,6 +151,74 @@ $$</p>
 </div>
 <p>As expected, <code class="docutils literal notranslate"><span class="pre">FIRST</span></code> identifies the first 5 factors as important, and the remaining are not taking part in the prediction of the response.</p>
 </section>
+<section id="choice-for-forward-selection">
+<h2>Choice for Forward Selection<a class="headerlink" href="#choice-for-forward-selection" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">FIRST</span></code> belongs to the class of forward-backward selection with early dropping algorithm (Borboudakis and Tsamardinos, 2019). In forward selection, each time we find the candidate that maximizes the output variance that can be explained. For candidates that cannot improve the variance explained conditional on the selected factors, they are removed from the candidate set. This forward selection step is run <code class="docutils literal notranslate"><span class="pre">n_forward</span></code> times to trade off between accuracy and efficiency. <code class="docutils literal notranslate"><span class="pre">n_forward</span> <span class="pre">=</span> <span class="pre">2</span></code> is recommended in Yu et al. (2020) and it is the default choice. To run the complete forward selection (see code below), please set <code class="docutils literal notranslate"><span class="pre">n_forward</span></code> to the number of factors / predictors. In backward elimination, we again remove one factor at a time, starting with the factor that can improve the explained variance most, till no factor can further improve.</p>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">FIRST</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">n_forward</span><span class="o">=</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>y has more than two unique values, setting it to regression problem with suggested n_knn = 2.
+
+Starting forward selection...
+
+Phase-1 Forward Selection...
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>current selection: 
+current variance explained: 0.000
+candidate to add: 0(5.257) 1(5.041) 2(1.962) 3(8.580) 4(2.028) 5(0.454) 6(0.044) 7(0.379) 8(0.000) 9(0.000)
+add candidate 3(8.580).
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>current selection: 3
+current variance explained: 8.580
+candidate to add: 0(13.588) 1(13.179) 2(11.062) 4(11.476) 5(8.588) 6(8.312) 7(8.761)
+add candidate 0(13.588).
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>current selection: 3 0
+current variance explained: 13.588
+candidate to add: 1(20.105) 2(16.034) 4(15.731) 5(13.345) 7(13.543)
+add candidate 1(20.105).
+
+current selection: 3 0 1
+current variance explained: 20.105
+candidate to add: 2(22.122) 4(21.959)
+add candidate 2(22.122).
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>current selection: 3 0 1 2
+current variance explained: 22.122
+candidate to add: 4(23.788)
+add candidate 4(23.788).
+
+Phase-2 Forward Selection...
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>current selection: 3 0 1 2 4
+current variance explained: 23.788
+candidate to add: 5(23.224) 6(23.214) 7(23.196) 8(23.198) 9(23.220)
+early termination since none of the candidates can be added in this phase.
+
+Starting backward elimination...
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>current selection: 0 1 2 3 4
+current variance explained: 23.788
+candidate to remove: 0(17.487) 1(18.108) 2(21.959) 3(16.038) 4(22.122)
+</pre></div>
+</div>
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([0.2648618 , 0.2387856 , 0.07689935, 0.32580823, 0.0700073 ,
+       0.        , 0.        , 0.        , 0.        , 0.        ])
+</pre></div>
+</div>
+</div>
+</div>
+</section>
 <section id="speeding-up-first">
 <h2>Speeding Up FIRST<a class="headerlink" href="#speeding-up-first" title="Link to this heading"></a></h2>
 <section id="parallel-computation">
@@ -235,7 +304,7 @@ $$</p>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([0.29201721, 0.27572069, 0.08616267, 0.36656964, 0.09175178,
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([0.27705174, 0.27572069, 0.09183685, 0.34139831, 0.08480965,
        0.        , 0.        , 0.        , 0.        , 0.        ])
 </pre></div>
 </div>
@@ -247,6 +316,8 @@ $$</p>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading"></a></h2>
 <p>Huang, C., &amp; Joseph, V. R. (2024). Factor Importance Ranking and Selection using Total Indices. arXiv preprint arXiv:2401.00800.</p>
+<p>Borboudakis, G., &amp; Tsamardinos, I. (2019). Forward-backward selection with early dropping. The Journal of Machine Learning Research, 20(1), 276-314.</p>
+<p>Yu, K., Guo, X., Liu, L., Li, J., Wang, H., Ling, Z., &amp; Wu, X. (2020). Causality-based feature selection: Methods and evaluations. ACM Computing Surveys (CSUR), 53(5), 1-36.</p>
 <p>Douze, M., Guzhva, A., Deng, C., Johnson, J., Szilvasy, G., Mazaré, P.E., Lomeli, M., Hosseini, L., &amp; Jégou, H., (2024). The Faiss library. arXiv preprint arXiv:2401.08281.</p>
 <p>Vakayil, A., &amp; Joseph, V. R. (2022). Data twinning. Statistical Analysis and Data Mining: The ASA Data Science Journal, 15(5), 598-610.</p>
 </section>

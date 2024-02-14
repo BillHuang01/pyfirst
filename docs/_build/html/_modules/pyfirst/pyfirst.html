@@ -409,7 +409,7 @@
 <span class="sd">        A logical indicating whether to standardize the factors / predictors.</span>
 <span class="sd">    </span>
 <span class="sd">    n_forward : int, default=2</span>
-<span class="sd">        The number of times to run the forward selection phase to tradeoff between efficiency and accuracy. `n_forward=2` is recommended.</span>
+<span class="sd">        The number of times to run the forward selection phase to tradeoff between efficiency and accuracy. `n_forward=2` is recommended. To run the complete forward selection, please set `n_forward` to the number of factors / predictors. </span>
 <span class="sd">    </span>
 <span class="sd">    n_jobs : int, default=1</span>
 <span class="sd">        The number of jobs to run in parallel. `n_jobs=-1` means using all processors.</span>
@@ -427,7 +427,7 @@
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
-<span class="sd">    `FIRST` belongs to the class of forward-backward selection with early dropping algorithm (Borboudakis and Tsamardinos, 2019). In forward selection, each time we find the candidate that maximizes the output variance that can be explained. For candidates that cannot improve the variance explained conditional on the selected factors, they are removed from the candidate set. This forward selection step is run `n_forward` times to tradeoff between accuracy and efficiency. `n_forward = 2` is recommended in (Yu et al., 2020). In backward elimination, we again remove one factor at a time, starting with the factor that can improve the explained variance most, till no factor can further improve. </span>
+<span class="sd">    `FIRST` belongs to the class of forward-backward selection with early dropping algorithm (Borboudakis and Tsamardinos, 2019). In forward selection, each time we find the candidate that maximizes the output variance that can be explained. For candidates that cannot improve the variance explained conditional on the selected factors, they are removed from the candidate set. This forward selection step is run `n_forward` times to tradeoff between accuracy and efficiency. `n_forward = 2` is recommended in Yu et al. (2020). To run the complete forward selection, please set `n_forward` to the number of factors / predictors. In backward elimination, we again remove one factor at a time, starting with the factor that can improve the explained variance most, till no factor can further improve. </span>
 
 <span class="sd">    `Faiss` (Douze et al., 2024) is used for efficient nearest-neighbor search, with the approximate search (`approx_knn=True`) by the inverted file index (IVF). IVF reduces the search scope through first clustering data into Voronoi cells. To further accelerate, we also support the use of subsamples by specifying `n_mc`. Both random and twinning (Vakayil and Joseph, 2022) subsamples are available, where twinning subsamples provide better approximation for the full data. </span>
 
@@ -524,6 +524,7 @@
     <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_forward</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Phase-</span><span class="si">{</span><span class="p">(</span><span class="n">t</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2"> Forward Selection...&quot;</span><span class="p">)</span>
+        <span class="n">none_added_to_subset</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">candidate</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">subset</span><span class="p">]</span>
         <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="c1"># compute total Sobol&#39; effect for -x (x for current subset)</span>
@@ -550,8 +551,15 @@
                 <span class="n">candidate</span> <span class="o">=</span> <span class="p">[</span><span class="n">candidate</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">candidate</span><span class="p">))</span> <span class="k">if</span> <span class="n">x_var</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">x_var_max</span><span class="p">]</span>
                 <span class="n">candidate</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">add_ind</span><span class="p">)</span>
                 <span class="n">subset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">add_ind</span><span class="p">)</span>
+                <span class="n">none_added_to_subset</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="n">x_var_max</span> <span class="o">=</span> <span class="n">x_var</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;add candidate </span><span class="si">{</span><span class="n">add_ind</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">x_var_max</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">).&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="k">if</span> <span class="n">none_added_to_subset</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;early termination since none of the candidates can be added in this phase.&quot;</span><span class="p">)</span>
                 <span class="k">break</span>
     
     <span class="c1"># backward elimination</span>
@@ -581,7 +589,9 @@
             <span class="c1"># find the index to remove such that the variance explained is maximized</span>
             <span class="n">remove_ind</span> <span class="o">=</span> <span class="n">subset</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">x_var</span><span class="p">)]</span>
             <span class="n">subset</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">remove_ind</span><span class="p">)</span>
-            <span class="n">x_var_max</span> <span class="o">=</span> <span class="n">x_var</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> 
+            <span class="n">x_var_max</span> <span class="o">=</span> <span class="n">x_var</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;remove candidate </span><span class="si">{</span><span class="n">remove_ind</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">x_var_max</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">).&quot;</span><span class="p">)</span> 
         <span class="k">else</span><span class="p">:</span>
             <span class="k">break</span>
 
