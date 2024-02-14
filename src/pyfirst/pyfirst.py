@@ -326,7 +326,7 @@ def FIRST(
         A logical indicating whether to standardize the factors / predictors.
     
     n_forward : int, default=2
-        The number of times to run the forward selection phase to tradeoff between efficiency and accuracy. `n_forward=2` is recommended.
+        The number of times to run the forward selection phase to tradeoff between efficiency and accuracy. `n_forward=2` is recommended. To run the complete forward selection, please set `n_forward` to the number of factors / predictors. 
     
     n_jobs : int, default=1
         The number of jobs to run in parallel. `n_jobs=-1` means using all processors.
@@ -344,7 +344,7 @@ def FIRST(
 
     Notes
     -----
-    `FIRST` belongs to the class of forward-backward selection with early dropping algorithm (Borboudakis and Tsamardinos, 2019). In forward selection, each time we find the candidate that maximizes the output variance that can be explained. For candidates that cannot improve the variance explained conditional on the selected factors, they are removed from the candidate set. This forward selection step is run `n_forward` times to tradeoff between accuracy and efficiency. `n_forward = 2` is recommended in (Yu et al., 2020). In backward elimination, we again remove one factor at a time, starting with the factor that can improve the explained variance most, till no factor can further improve. 
+    `FIRST` belongs to the class of forward-backward selection with early dropping algorithm (Borboudakis and Tsamardinos, 2019). In forward selection, each time we find the candidate that maximizes the output variance that can be explained. For candidates that cannot improve the variance explained conditional on the selected factors, they are removed from the candidate set. This forward selection step is run `n_forward` times to tradeoff between accuracy and efficiency. `n_forward = 2` is recommended in (Yu et al., 2020). To run the complete forward selection, please set `n_forward` to the number of factors / predictors. In backward elimination, we again remove one factor at a time, starting with the factor that can improve the explained variance most, till no factor can further improve. 
 
     `Faiss` (Douze et al., 2024) is used for efficient nearest-neighbor search, with the approximate search (`approx_knn=True`) by the inverted file index (IVF). IVF reduces the search scope through first clustering data into Voronoi cells. To further accelerate, we also support the use of subsamples by specifying `n_mc`. Both random and twinning (Vakayil and Joseph, 2022) subsamples are available, where twinning subsamples provide better approximation for the full data. 
 
