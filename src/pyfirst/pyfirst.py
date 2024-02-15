@@ -106,7 +106,10 @@ def _exp_var_knn(
     # nearest-neighbor search and compute expected conditional variance
     if n_mc < n:
         if twin_mc:
-            query_ind = twin(data=X.astype(np.float64), r=((n-1)//n_mc+1), u1=int(rng.choice(n,1)))[:n_mc]
+            r = n//n_mc
+            keep_ind = rng.permutation(np.arange(n))[:(n_mc*r)]
+            twin_ind = twin(data=X[keep_ind,:].astype(np.float64), r=r, u1=0)
+            query_ind = keep_ind[twin_ind]
         else:
             query_ind = rng.permutation(np.arange(n))[:n_mc]
     else:
