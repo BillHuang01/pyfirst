@@ -184,14 +184,14 @@ add candidate 0(13.588).
 current variance explained: 13.588
 candidate to add: 1(20.105) 2(16.034) 4(15.731) 5(13.345) 7(13.543)
 add candidate 1(20.105).
-
-current selection: 3 0 1
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>current selection: 3 0 1
 current variance explained: 20.105
 candidate to add: 2(22.122) 4(21.959)
 add candidate 2(22.122).
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>current selection: 3 0 1 2
+
+current selection: 3 0 1 2
 current variance explained: 22.122
 candidate to add: 4(23.788)
 add candidate 4(23.788).
@@ -262,13 +262,12 @@ candidate to remove: 0(17.487) 1(18.108) 2(21.959) 3(16.038) 4(22.122)
 <h4>Random Subsamples<a class="headerlink" href="#random-subsamples" title="Link to this heading"></a></h4>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">43</span><span class="p">)</span>
-<span class="n">FIRST</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">n_mc</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">FIRST</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">n_mc</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">43</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([0.26479634, 0.23567279, 0.07756636, 0.33297155, 0.064703  ,
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([0.26198021, 0.23528031, 0.07956943, 0.34468169, 0.06488056,
        0.        , 0.        , 0.        , 0.        , 0.        ])
 </pre></div>
 </div>
@@ -279,13 +278,12 @@ candidate to remove: 0(17.487) 1(18.108) 2(21.959) 3(16.038) 4(22.122)
 <h4>Twinning Subsamples<a class="headerlink" href="#twinning-subsamples" title="Link to this heading"></a></h4>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">43</span><span class="p">)</span>
-<span class="n">FIRST</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">n_mc</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">twin_mc</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">FIRST</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">n_mc</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">twin_mc</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">43</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([0.28075163, 0.2553532 , 0.06957491, 0.3351466 , 0.07408396,
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([0.26132392, 0.22754917, 0.06887766, 0.31153919, 0.06237415,
        0.        , 0.        , 0.        , 0.        , 0.        ])
 </pre></div>
 </div>
@@ -299,12 +297,12 @@ candidate to remove: 0(17.487) 1(18.108) 2(21.959) 3(16.038) 4(22.122)
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">make_friedman1</span><span class="p">(</span><span class="n">n_samples</span><span class="o">=</span><span class="mi">1000000</span><span class="p">,</span> <span class="n">n_features</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">noise</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">43</span><span class="p">)</span>
-<span class="n">FIRST</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">n_mc</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">approx_knn</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">FIRST</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">n_mc</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">approx_knn</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">43</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([0.27705174, 0.27572069, 0.09183685, 0.34139831, 0.08480965,
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([0.27360209, 0.30479748, 0.08815202, 0.34269827, 0.08091292,
        0.        , 0.        , 0.        , 0.        , 0.        ])
 </pre></div>
 </div>

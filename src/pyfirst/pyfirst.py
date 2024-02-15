@@ -122,7 +122,7 @@ def _exp_var_knn(
 def TotalSobolKNN(
         X:Union[pd.DataFrame, np.ndarray], 
         y:Union[pd.Series, np.ndarray], 
-        noise:bool = True, 
+        noise:bool, 
         n_knn:int = None, 
         approx_knn:bool = False, 
         n_mc:int = None, 
@@ -144,7 +144,7 @@ def TotalSobolKNN(
     y : pd.Series or np.ndarray
         A pd.Series or np.ndarray for the responses. 
     
-    noise : bool, default=True
+    noise : bool
         A logical indicating whether the responses are noisy.
     
     n_knn : int, default=None
@@ -260,7 +260,7 @@ def TotalSobolKNN(
             approx_knn = approx_knn,
             n_mc = n_mc, 
             twin_mc = twin_mc,
-            random_state = rng,
+            random_state = rng.randint(1e9, size=1)[0],
         )
     else:
         noise_var = 0
@@ -268,6 +268,7 @@ def TotalSobolKNN(
     if y_var == 0:
         tsi = np.zeros(p)
     else:
+        seeds = rng.randint(1e9, size=p)
         xe_var = Parallel(n_jobs=n_jobs,prefer='threads')(delayed(_exp_var_knn)(
             X = X,
             y = y,
@@ -277,7 +278,7 @@ def TotalSobolKNN(
             approx_knn = approx_knn,
             n_mc = n_mc, 
             twin_mc = twin_mc,
-            random_state = rng,
+            random_state = seeds[i],
         ) for i in range(p))
         xe_var = np.array(xe_var)
         xi_var = np.maximum(xe_var - noise_var, 0) 
@@ -448,6 +449,7 @@ def FIRST(
         candidate = [i for i in range(p) if i not in subset]
         while len(candidate) > 0:
             # compute total Sobol' effect for -x (x for current subset)
+            seeds = rng.randint(1e9, size=len(candidate))
             nx_var = Parallel(n_jobs=n_jobs,prefer='threads')(delayed(_exp_var_knn)(
                 X = X,
                 y = y,
@@ -457,7 +459,7 @@ def FIRST(
                 approx_knn = approx_knn,
                 n_mc = n_mc, 
                 twin_mc = twin_mc,
-                random_state = rng,
+                random_state = seeds[i],
             ) for i in range(len(candidate)))
             nx_var = np.array(nx_var)
             x_var = np.maximum(y_var - nx_var, 0)
@@ -488,6 +490,7 @@ def FIRST(
     subset.sort()
     while len(subset) > 0:
         # compute total sobol' effect for -(x/{i}) (x for current subset)
+        seeds = rng.randint(1e9, size=len(subset))
         nx_var = Parallel(n_jobs=n_jobs,prefer='threads')(delayed(_exp_var_knn)(
             X = X,
             y = y,
@@ -497,7 +500,7 @@ def FIRST(
             approx_knn = approx_knn,
             n_mc = n_mc, 
             twin_mc = twin_mc,
-            random_state = rng,
+            random_state = seeds[i],
         ) for i in range(len(subset)))
         nx_var = np.array(nx_var)
         x_var = np.maximum(y_var - nx_var, 0)

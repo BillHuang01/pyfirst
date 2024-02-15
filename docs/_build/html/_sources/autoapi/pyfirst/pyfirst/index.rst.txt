@@ -28,7 +28,7 @@ Functions
 
 
 
-.. py:function:: TotalSobolKNN(X: Union[pandas.DataFrame, numpy.ndarray], y: Union[pandas.Series, numpy.ndarray], noise: bool = True, n_knn: int = None, approx_knn: bool = False, n_mc: int = None, twin_mc: bool = False, rescale: bool = True, n_jobs: int = 1, random_state: Union[int, numpy.random.RandomState] = None) -> numpy.ndarray
+.. py:function:: TotalSobolKNN(X: Union[pandas.DataFrame, numpy.ndarray], y: Union[pandas.Series, numpy.ndarray], noise: bool, n_knn: int = None, approx_knn: bool = False, n_mc: int = None, twin_mc: bool = False, rescale: bool = True, n_jobs: int = 1, random_state: Union[int, numpy.random.RandomState] = None) -> numpy.ndarray
 
    Estimating Total Sobol' Indices from Data
 
@@ -39,7 +39,7 @@ Functions
    :param y: A pd.Series or np.ndarray for the responses.
    :type y: pd.Series or np.ndarray
    :param noise: A logical indicating whether the responses are noisy.
-   :type noise: bool, default=True
+   :type noise: bool
    :param n_knn: The number of nearest-neighbor for the inner loop conditional variance estimation. `n_knn=2` is recommended for regression, and `n_knn=3` for binary classification.
    :type n_knn: int, default=None
    :param approx_knn: A logical indicating whether to use approximate nearest-neighbor search, otherwise exact search is used. It is supported when there are at least 10,000 data instances.
