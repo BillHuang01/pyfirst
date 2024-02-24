@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.3 (02/23/2024)
+
+- Fix issue for columns with constant value
+
 ## 0.1.2 (02/15/2024)
 
 - Fix random state issue when running in parallel

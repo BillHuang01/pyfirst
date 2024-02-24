@@ -47,7 +47,7 @@ def _exp_var_knn(
         X:pd.DataFrame,
         y:np.ndarray,
         subset:List[int],
-        duplicate:Optional[List[bool]] = None,
+        factor_nunique:Optional[np.ndarray] = None,
         n_knn:int = 2,
         approx_knn:bool = False,
         n_mc:int = None,
@@ -81,15 +81,14 @@ def _exp_var_knn(
     twin_mc = False if n//n_mc < 2 else twin_mc
 
     # check if any row of X duplicate and preprocess categorical features
-    if duplicate is None:
-        duplicate = [not X.iloc[:,i].is_unique for i in subset]
+    if factor_nunique is None:
+        factor_nunique = X.nunique().values
     else:
-        assert isinstance(duplicate, List) and isinstance(duplicate[0], bool), f"duplicate must be a list of boolean."
-        assert len(duplicate) == p, f"duplicate ({len(duplicate)}) must be the same size of X ({p})."
-        duplicate = [duplicate[i] for i in subset]
+        assert factor_nunique.size == p, f"factor_nunique ({factor_nunique.size}) must be the same size of X ({p})."
+        factor_nunique = factor_nunique[subset]
     X = X.iloc[:,subset].copy()
     row_duplicated = False
-    if all(duplicate):
+    if (factor_nunique < n).all():
         if X.shape[1] > 1:
             if X.duplicated().any():
                 row_duplicated = True
@@ -192,18 +191,21 @@ def TotalSobolKNN(
     """
 
     # argument check for random state
-    rng = check_random_state(random_state)
-
-    # argument check for X and y
-    assert isinstance(X, pd.DataFrame) or isinstance(X, np.ndarray), f"X must be pd.DataFrame/np.ndarry type, but {type(X)} is provided."
-    assert isinstance(y, pd.Series) or isinstance(y, np.ndarray), f"y must be pd.Series/np.ndarray type, but {type(y)} is provided."
-    assert X.shape[0] == y.size, f"Size of X ({X.shape[0]}) and y ({y.size}) does not match."
-    assert X.ndim == 2, f"Input X must be 2D."
-    assert y.ndim == 1, f"Output y must be 1D."   
+    rng = check_random_state(random_state)  
 
     # make a copy to avoid mutation of input
     X = X.copy()
     y = y.copy()
+
+    # argument check for X and y
+    assert isinstance(X, pd.DataFrame) or isinstance(X, np.ndarray), f"X must be pd.DataFrame/np.ndarry type, but {type(X)} is provided."
+    assert isinstance(y, pd.Series) or isinstance(y, np.ndarray), f"y must be pd.Series/np.ndarray type, but {type(y)} is provided."
+    if isinstance(y, pd.Series):
+        y = y.values
+    y = y.squeeze()
+    assert X.shape[0] == y.size, f"Size of X ({X.shape[0]}) and y ({y.size}) does not match."
+    assert X.ndim == 2, f"Input X must be 2D."
+    assert y.ndim == 1, f"Output y must be 1D." 
     n, p = X.shape
     
     # argument check for using subsample
@@ -219,24 +221,25 @@ def TotalSobolKNN(
     if isinstance(X, np.ndarray):
         X = pd.DataFrame(X, columns=[f"x{i}" for i in range(p)])
     assert not X.dtypes.apply(lambda dt: isinstance(dt, pd.SparseDtype)).any(), f"X cannot be sparse. Please convert them to dense."
-    duplicate = [not X.iloc[:,i].is_unique for i in range(p)]
+    factor_nunique = X.nunique().values
+    factor_non_constant = []
     for i in range(p):
-        if is_numeric_dtype(X.iloc[:,i]):
-            assert np.isfinite(X.iloc[:,i].values).all(), f"X cannot contain any missing/infinite value."
-            if rescale:
-                if is_bool_dtype(X.iloc[:,i]): 
-                    # make binary input -1/1, see Gelman 
-                    # http://www.stat.columbia.edu/~gelman/research/published/standardizing7.pdf
-                    X.iloc[:,i] = 2.0 * (X.iloc[:,i].astype(np.float32) - 0.5)
-                else:
-                    if (X.iloc[:,i].isin([0,1]).all()): # check for implicit binary input
+        if factor_nunique[i] > 1:
+            factor_non_constant.append(i)
+            if is_numeric_dtype(X.iloc[:,i]):
+                assert np.isfinite(X.iloc[:,i].values).all(), f"X cannot contain any missing/infinite value."
+                if rescale:
+                    if is_bool_dtype(X.iloc[:,i]): 
+                        # make binary input -1/1, see Gelman 
+                        # http://www.stat.columbia.edu/~gelman/research/published/standardizing7.pdf
                         X.iloc[:,i] = 2.0 * (X.iloc[:,i].astype(np.float32) - 0.5)
                     else:
-                        X.iloc[:,i] = (X.iloc[:,i] - np.mean(X.iloc[:,i])) / np.std(X.iloc[:,i])
-        else:
-            assert not X.iloc[:,i].isnull().any(), f"X cannot contain any missing value."
-    if isinstance(y, pd.Series):
-        y = y.values
+                        if (X.iloc[:,i].isin([0,1]).all()): # check for implicit binary input
+                            X.iloc[:,i] = 2.0 * (X.iloc[:,i].astype(np.float32) - 0.5)
+                        else:
+                            X.iloc[:,i] = (X.iloc[:,i] - np.mean(X.iloc[:,i])) / np.std(X.iloc[:,i])
+            else:
+                assert not X.iloc[:,i].isnull().any(), f"X cannot contain any missing value."
     assert not hasattr(y, "sparse"), f"y cannot be sparse. Please convert it to dense."
     assert np.isfinite(y).all(), f"y cannot contain any missing/infinite value."
     assert np.unique(y).size > 1, f"y must have more than one unique value."
@@ -254,8 +257,8 @@ def TotalSobolKNN(
         noise_var = _exp_var_knn(
             X = X,
             y = y,
-            subset = [i for i in range(p)],
-            duplicate = duplicate,
+            subset = factor_non_constant,
+            factor_nunique = factor_nunique,
             n_knn = n_knn, 
             approx_knn = approx_knn,
             n_mc = n_mc, 
@@ -264,25 +267,24 @@ def TotalSobolKNN(
         )
     else:
         noise_var = 0
-    y_var = max(np.var(y,ddof=1) - noise_var, 0)    
-    if y_var == 0:
-        tsi = np.zeros(p)
-    else:
-        seeds = rng.randint(1e9, size=p)
+    y_var = max(np.var(y,ddof=1) - noise_var, 0)
+    tsi = np.zeros(p)
+    if y_var > 0:
+        seeds = rng.randint(1e9, size=len(factor_non_constant))
         xe_var = Parallel(n_jobs=n_jobs,prefer='threads')(delayed(_exp_var_knn)(
             X = X,
             y = y,
-            subset = list(range(0,i))+list(range(i+1,p)),
-            duplicate = duplicate,
+            subset = factor_non_constant[:i]+factor_non_constant[(i+1):],
+            factor_nunique = factor_nunique,
             n_knn = n_knn, 
             approx_knn = approx_knn,
             n_mc = n_mc, 
             twin_mc = twin_mc,
             random_state = seeds[i],
-        ) for i in range(p))
+        ) for i in range(len(factor_non_constant)))
         xe_var = np.array(xe_var)
         xi_var = np.maximum(xe_var - noise_var, 0) 
-        tsi = xi_var / y_var
+        tsi[factor_non_constant] = xi_var / y_var
 
     return tsi
 
@@ -375,16 +377,19 @@ def FIRST(
     # argument check for random state
     rng = check_random_state(random_state)
 
-    # argument check for X and y
-    assert isinstance(X, pd.DataFrame) or isinstance(X, np.ndarray), f"X must be pd.DataFrame/np.ndarry type, but {type(X)} is provided."
-    assert isinstance(y, pd.Series) or isinstance(y, np.ndarray), f"y must be pd.Series/np.ndarray type, but {type(y)} is provided."
-    assert X.shape[0] == y.size, f"Size of X ({X.shape[0]}) and y ({y.size}) does not match."
-    assert X.ndim == 2, f"Input X must be 2D."
-    assert y.ndim == 1, f"Output y must be 1D."  
-
     # make a copy to avoid mutation of input
     X = X.copy()
     y = y.copy()
+
+    # argument check for X and y
+    assert isinstance(X, pd.DataFrame) or isinstance(X, np.ndarray), f"X must be pd.DataFrame/np.ndarry type, but {type(X)} is provided."
+    assert isinstance(y, pd.Series) or isinstance(y, np.ndarray), f"y must be pd.Series/np.ndarray type, but {type(y)} is provided."
+    if isinstance(y, pd.Series):
+        y = y.values
+    y = y.squeeze()
+    assert X.shape[0] == y.size, f"Size of X ({X.shape[0]}) and y ({y.size}) does not match."
+    assert X.ndim == 2, f"Input X must be 2D."
+    assert y.ndim == 1, f"Output y must be 1D."  
     n, p = X.shape
     
     # argument check for using subsample
@@ -400,24 +405,25 @@ def FIRST(
     if isinstance(X, np.ndarray):
         X = pd.DataFrame(X, columns=[f"x{i}" for i in range(p)])
     assert not X.dtypes.apply(lambda dt: isinstance(dt, pd.SparseDtype)).any(), f"X cannot be sparse. Please convert them to dense."
-    duplicate = [not X.iloc[:,i].is_unique for i in range(p)]
+    factor_nunique = X.nunique().values
+    factor_non_constant = []
     for i in range(p):
-        if is_numeric_dtype(X.iloc[:,i]):
-            assert np.isfinite(X.iloc[:,i].values).all(), f"X cannot contain any missing/infinite value."
-            if rescale:
-                if is_bool_dtype(X.iloc[:,i]): 
-                    # make binary input -1/1, see Gelman 
-                    # http://www.stat.columbia.edu/~gelman/research/published/standardizing7.pdf
-                    X.iloc[:,i] = 2.0 * (X.iloc[:,i].astype(np.float32) - 0.5)
-                else:
-                    if (X.iloc[:,i].isin([0,1]).all()): # check for implicit binary input
+        if factor_nunique[i] > 1:
+            factor_non_constant.append(i)
+            if is_numeric_dtype(X.iloc[:,i]):
+                assert np.isfinite(X.iloc[:,i].values).all(), f"X cannot contain any missing/infinite value."
+                if rescale:
+                    if is_bool_dtype(X.iloc[:,i]): 
+                        # make binary input -1/1, see Gelman 
+                        # http://www.stat.columbia.edu/~gelman/research/published/standardizing7.pdf
                         X.iloc[:,i] = 2.0 * (X.iloc[:,i].astype(np.float32) - 0.5)
                     else:
-                        X.iloc[:,i] = (X.iloc[:,i] - np.mean(X.iloc[:,i])) / np.std(X.iloc[:,i])
-        else:
-            assert not X.iloc[:,i].isnull().any(), f"X cannot contain any missing value."
-    if isinstance(y, pd.Series):
-        y = y.values
+                        if (X.iloc[:,i].isin([0,1]).all()): # check for implicit binary input
+                            X.iloc[:,i] = 2.0 * (X.iloc[:,i].astype(np.float32) - 0.5)
+                        else:
+                            X.iloc[:,i] = (X.iloc[:,i] - np.mean(X.iloc[:,i])) / np.std(X.iloc[:,i])
+            else:
+                assert not X.iloc[:,i].isnull().any(), f"X cannot contain any missing value."
     assert not hasattr(y, "sparse"), f"y cannot be sparse. Please convert it to dense."
     assert np.isfinite(y).all(), f"y cannot contain any missing/infinite value."
     assert np.unique(y).size > 1, f"y must have more than one unique value."
@@ -439,6 +445,8 @@ def FIRST(
     # forward selection 
     if verbose:
         print("Starting forward selection...")
+        if len(factor_non_constant) < p:
+            print(f"factors removed because of constant value: {' '.join(str(i) for i in range(p) if i not in factor_non_constant)}")
     y_var = np.var(y, ddof=1)
     subset = []
     x_var_max = 0
@@ -446,7 +454,7 @@ def FIRST(
         if verbose:
             print(f"\nPhase-{(t+1):d} Forward Selection...")
         none_added_to_subset = True
-        candidate = [i for i in range(p) if i not in subset]
+        candidate = [i for i in factor_non_constant if i not in subset]
         while len(candidate) > 0:
             # compute total Sobol' effect for -x (x for current subset)
             seeds = rng.randint(1e9, size=len(candidate))
@@ -454,7 +462,7 @@ def FIRST(
                 X = X,
                 y = y,
                 subset = subset + [candidate[i]],
-                duplicate = duplicate,
+                factor_nunique = factor_nunique,
                 n_knn = n_knn, 
                 approx_knn = approx_knn,
                 n_mc = n_mc, 
@@ -495,7 +503,7 @@ def FIRST(
             X = X,
             y = y,
             subset = subset[:i]+subset[(i+1):],
-            duplicate = duplicate,
+            factor_nunique = factor_nunique,
             n_knn = n_knn, 
             approx_knn = approx_knn,
             n_mc = n_mc, 
