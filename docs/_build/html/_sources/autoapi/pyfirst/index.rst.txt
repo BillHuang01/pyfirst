@@ -132,7 +132,7 @@ Functions
    Vakayil, A., & Joseph, V. R. (2022). Data twinning. Statistical Analysis and Data Mining: The ASA Data Science Journal, 15(5), 598-610.
 
 
-.. py:class:: SelectByFIRST(n_knn: int = None, approx_knn: bool = True, regression: bool = True, rescale: bool = True, n_forward: int = 2, n_jobs: int = 1, random_state: Union[int, numpy.random.RandomState] = None, verbose: bool = False)
+.. py:class:: SelectByFIRST(regression: bool = True, n_knn: int = None, approx_knn: bool = False, rescale: bool = True, n_forward: int = 2, n_jobs: int = 1, random_state: Union[int, numpy.random.RandomState] = None, verbose: bool = False)
 
 
    Bases: :py:obj:`sklearn.feature_selection._base.SelectorMixin`, :py:obj:`sklearn.base.BaseEstimator`

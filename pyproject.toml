@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyfirst"
-version = "0.1.3"
+version = "0.1.4"
 description = "Factor Importance Ranking and Selection using Total Indices"
 authors = ["Chaofan Huang <chuang397@gatech.edu>", "V. Roshan Joseph <roshan@gatech.edu>"]
 maintainers = ["Chaofan Huang <chuang397@gatech.edu>"]

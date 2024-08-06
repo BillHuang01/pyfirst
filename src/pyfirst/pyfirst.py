@@ -597,9 +597,9 @@ class SelectByFIRST(SelectorMixin, BaseEstimator):
 
     def __init__(
             self, 
-            n_knn:int = None,
-            approx_knn:bool = True,
             regression:bool = True,
+            n_knn:int = None,
+            approx_knn:bool = False,
             rescale:bool = True,
             n_forward:int = 2,
             n_jobs:int = 1,
@@ -658,7 +658,7 @@ class SelectByFIRST(SelectorMixin, BaseEstimator):
         """
 
         if not self.regression:
-            assert np.unique(y) == 2, f"Only binary classification is supported by FIRST."
+            assert np.unique(y).size == 2, f"Only binary classification is supported by FIRST."
 
         self.importance_ = FIRST(
             X = X,

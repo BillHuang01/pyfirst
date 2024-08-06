@@ -51,9 +51,18 @@
 <li class="toctree-l1"><a class="reference internal" href="FIRST.html">FIRST</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">SelectByFIRST</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#imports">Imports</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#fetch-data">Fetch Data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#build-pipeline-and-train">Build Pipeline and Train</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#test-r-2-vs-full-model">Test <span class="math notranslate nohighlight">\(R^2\)</span> vs Full Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#regression">Regression</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#fetch-data">Fetch Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#build-pipeline-and-train">Build Pipeline and Train</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-r-2-vs-full-model">Test <span class="math notranslate nohighlight">\(R^2\)</span> vs Full Model</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#binary-classification">Binary Classification</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Fetch Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Build Pipeline and Train</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#test-accuracy-vs-full-model">Test Accuracy vs Full Model</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="TotalSobolKNN.html">TotalSobolKNN</a></li>
@@ -102,16 +111,18 @@
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">pyfirst</span> <span class="kn">import</span> <span class="n">SelectByFIRST</span>
 <span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="kn">import</span> <span class="n">Pipeline</span>
-<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
+<span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span><span class="p">,</span> <span class="n">RandomForestClassifier</span>
 <span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">train_test_split</span>
-<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_california_housing</span>
+<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">fetch_california_housing</span><span class="p">,</span> <span class="n">load_breast_cancer</span>
 </pre></div>
 </div>
 </div>
 </div>
 </section>
+<section id="regression">
+<h2>Regression<a class="headerlink" href="#regression" title="Link to this heading"></a></h2>
 <section id="fetch-data">
-<h2>Fetch Data<a class="headerlink" href="#fetch-data" title="Link to this heading"></a></h2>
+<h3>Fetch Data<a class="headerlink" href="#fetch-data" title="Link to this heading"></a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">housing</span> <span class="o">=</span> <span class="n">fetch_california_housing</span><span class="p">()</span>
@@ -124,7 +135,7 @@
 </div>
 </section>
 <section id="build-pipeline-and-train">
-<h2>Build Pipeline and Train<a class="headerlink" href="#build-pipeline-and-train" title="Link to this heading"></a></h2>
+<h3>Build Pipeline and Train<a class="headerlink" href="#build-pipeline-and-train" title="Link to this heading"></a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
@@ -137,7 +148,7 @@
 </div>
 </section>
 <section id="test-r-2-vs-full-model">
-<h2>Test <span class="math notranslate nohighlight">\(R^2\)</span> vs Full Model<a class="headerlink" href="#test-r-2-vs-full-model" title="Link to this heading"></a></h2>
+<h3>Test <span class="math notranslate nohighlight">\(R^2\)</span> vs Full Model<a class="headerlink" href="#test-r-2-vs-full-model" title="Link to this heading"></a></h3>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
@@ -170,13 +181,89 @@
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([0.00734335, 0.        , 0.        , 0.        , 0.        ,
-       0.01010999, 0.13941309, 0.15473792])
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([0.00749229, 0.        , 0.        , 0.        , 0.        ,
+       0.01008637, 0.13938932, 0.15473464])
 </pre></div>
 </div>
 </div>
 </div>
 <p>Comparable test <span class="math notranslate nohighlight">\(R^2\)</span> is observed from the random forest model fitted on the 4 factors identified by FIRST versus the random forest model fitted on the entire set of factors.</p>
+</section>
+</section>
+<section id="binary-classification">
+<h2>Binary Classification<a class="headerlink" href="#binary-classification" title="Link to this heading"></a></h2>
+<section id="id1">
+<h3>Fetch Data<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">cancer</span> <span class="o">=</span> <span class="n">load_breast_cancer</span><span class="p">()</span>
+<span class="n">X</span> <span class="o">=</span> <span class="n">cancer</span><span class="o">.</span><span class="n">data</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">cancer</span><span class="o">.</span><span class="n">target</span>
+<span class="n">X_train</span><span class="p">,</span> <span class="n">X_test</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">y_test</span> <span class="o">=</span> <span class="n">train_test_split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">test_size</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">43</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="id2">
+<h3>Build Pipeline and Train<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span> <span class="o">=</span> <span class="n">Pipeline</span><span class="p">([</span>
+    <span class="p">(</span><span class="s1">&#39;selector&#39;</span><span class="p">,</span> <span class="n">SelectByFIRST</span><span class="p">(</span><span class="n">regression</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="n">random_state</span><span class="o">=</span><span class="mi">43</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s1">&#39;estimator&#39;</span><span class="p">,</span> <span class="n">RandomForestClassifier</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">43</span><span class="p">))</span>
+<span class="p">])</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</section>
+<section id="test-accuracy-vs-full-model">
+<h3>Test Accuracy vs Full Model<a class="headerlink" href="#test-accuracy-vs-full-model" title="Link to this heading"></a></h3>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>0.9736842105263158
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">full</span> <span class="o">=</span> <span class="n">RandomForestClassifier</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">43</span><span class="p">)</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">)</span>
+<span class="n">full</span><span class="o">.</span><span class="n">score</span><span class="p">(</span><span class="n">X_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>0.9912280701754386
+</pre></div>
+</div>
+</div>
+</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">pipe</span><span class="p">[</span><span class="s1">&#39;selector&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get_feature_importance</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([0.        , 0.04416144, 0.01358814, 0.        , 0.        ,
+       0.        , 0.        , 0.        , 0.        , 0.        ,
+       0.        , 0.        , 0.00339703, 0.        , 0.        ,
+       0.        , 0.        , 0.        , 0.        , 0.        ,
+       0.        , 0.        , 0.00339703, 0.0101911 , 0.14267543,
+       0.        , 0.        , 0.        , 0.        , 0.        ])
+</pre></div>
+</div>
+</div>
+</div>
+<p>Comparable test accuracy is observed from the random forest model fitted on the 6 factors identified by FIRST versus the random forest model fitted on the entire set of factors.</p>
+</section>
 </section>
 </section>
 

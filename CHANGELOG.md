@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.4 (08/05/2025)
+
+- Fix the binary classification error from using SelectByFIRST
+
 ## 0.1.3 (02/23/2024)
 
 - Fix issue for columns with constant value
