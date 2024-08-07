@@ -79,7 +79,7 @@
    "outputs": [],
    "source": [
     "pipe = Pipeline([\n",
-    "    ('selector', SelectByFIRST(regression=True,random_state=43)),\n",
+    "    ('selector', SelectByFIRST(regression=True,approx_knn=True,random_state=43)),\n",
     "    ('estimator', RandomForestRegressor(random_state=43))\n",
     "]).fit(X_train, y_train)"
    ]
@@ -140,8 +140,8 @@
     {
      "data": {
       "text/plain": [
-       "array([0.00749229, 0.        , 0.        , 0.        , 0.        ,\n",
-       "       0.01008637, 0.13938932, 0.15473464])"
+       "array([0.00734335, 0.        , 0.        , 0.        , 0.        ,\n",
+       "       0.01010999, 0.13941309, 0.15473792])"
       ]
      },
      "execution_count": 7,
