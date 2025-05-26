@@ -7,6 +7,7 @@
 
 FIRST.ipynb
 SelectByFIRST.ipynb
+ShapleySobolKNN.ipynb
 TotalSobolKNN.ipynb
 changelog.md
 autoapi/index

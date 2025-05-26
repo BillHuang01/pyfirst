@@ -1,1 +1,1 @@
-from .pyfirst import TotalSobolKNN, FIRST, SelectByFIRST
+from .pyfirst import TotalSobolKNN, ShapleySobolKNN, FIRST, SelectByFIRST

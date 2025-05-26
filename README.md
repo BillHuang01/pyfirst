@@ -72,31 +72,49 @@ TotalSobolKNN(X, y, noise=True)
 ```
 For more details and applications, please see [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)][9] or [API documentation][12]. 
 
-A documentation of this module is also available on [Read the Docs][13].
+### Shapley Sobol' Indices Estimation
+
+This module also provides the function ``ShapleySobolKNN`` for a consistent estimation of Shapley Sobol' indices ([Owen, 2014][16]; [Song et al., 2016][17]) directly from scattered data. When the response is noiseless, ``ShapleySobolKNN`` implements the Nearest-Neighbor estimator from [Broto et al. (2020)][6]. For noisy response, ``ShapleySobolKNN`` implements the Noise-Adjusted Nearest-Neighbor estimator from [Huang and Joseph (2024)][1]. ``ShapleySobolKNN`` returns a numpy ndarray for the Shapley Sobol' indices estimation.
+
+```python
+from pyfirst import ShapleySobolKNN
+from sklearn.datasets import make_friedman1
+
+X, y = make_friedman1(n_samples=10000, n_features=5, noise=1.0, random_state=43)
+
+ShapleySobolKNN(X, y, noise=True)
+```
+For more details and applications, please see [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)][14] or [API documentation][15]. 
 
 ## References
 
-Huang, C., & Joseph, V. R. (2024). Factor Importance Ranking and Selection using Total Indices. arXiv preprint arXiv:2401.00800.
+Huang, C., & Joseph, V. R. (2025). Factor Importance Ranking and Selection using Total Indices. Technometrics.
 
 Sobol', I. M. (2001). Global sensitivity indices for nonlinear mathematical models and their Monte Carlo estimates. Mathematics and computers in simulation, 55(1-3), 271-280.
 
 Broto, B., Bachoc, F., & Depecker, M. (2020). Variance reduction for estimation of Shapley effects and adaptation to unknown input distribution. SIAM/ASA Journal on Uncertainty Quantification, 8(2), 693-716.
+
+Owen, A. B. (2014), “Sobol’indices and Shapley value,” SIAM/ASA Journal on Uncertainty Quantification, 2, 245–251.
+
+Song, E., Nelson, B. L., & Staum, J. (2016), “Shapley effects for global sensitivity analysis: Theory and computation,” SIAM/ASA Journal on Uncertainty Quantification, 4, 1060-1083.
 
 ## Citation
 
 If you find this module useful, please consider citing 
 
 ```
-@article{huang2024factor,
+@article{huang2025factor,
   title={Factor Importance Ranking and Selection using Total Indices},
   author={Huang, Chaofan and Joseph, V Roshan},
-  journal={arXiv preprint arXiv:2401.00800},
-  year={2024}
+  journal={Technometrics},
+  pages={1--29},
+  year={2025},
+  publisher={Taylor \& Francis}
 }
 ```
 
 
-[1]:https://arxiv.org/abs/2401.00800
+[1]:https://www.tandfonline.com/doi/full/10.1080/00401706.2025.2483531
 [2]:https://cran.r-project.org/web/packages/first/index.html
 [3]:https://scikit-learn.org/stable/modules/generated/sklearn.pipeline.Pipeline.html
 [4]: https://scikit-learn.org/stable/modules/feature_selection.html
@@ -109,3 +127,7 @@ If you find this module useful, please consider citing
 [11]: https://pyfirst.readthedocs.io/en/latest/autoapi/pyfirst/index.html#pyfirst.SelectByFIRST
 [12]: https://pyfirst.readthedocs.io/en/latest/autoapi/pyfirst/index.html#pyfirst.TotalSobolKNN
 [13]: https://pyfirst.readthedocs.io/
+[14]: https://colab.research.google.com/github/BillHuang01/pyfirst/blob/main/docs/ShapleySobolKNN.ipynb
+[15]: https://pyfirst.readthedocs.io/en/latest/autoapi/pyfirst/index.html#pyfirst.ShapleySobolKNN
+[16]: https://epubs.siam.org/doi/10.1137/130936233
+[17]: https://epubs.siam.org/doi/10.1137/15M1048070

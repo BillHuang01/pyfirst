@@ -2,15 +2,98 @@ import faiss
 import numpy as np
 import pandas as pd
 from twinning import twin
+from math import comb
 from joblib import Parallel, delayed
 from pandas.api.types import is_numeric_dtype, is_bool_dtype
-from typing import List, Optional, Union
+from typing import List, Optional, Tuple, Union
 from sklearn.base import BaseEstimator
 from sklearn.feature_selection._base import SelectorMixin
 from sklearn.utils import check_random_state
 from sklearn.utils.validation import check_is_fitted
 
-__all__ = ['TotalSobolKNN', 'FIRST', 'SelectByFIRST']
+__all__ = ['TotalSobolKNN', 'ShapleySobolKNN', 'FIRST', 'SelectByFIRST']
+
+def _check_X_y_and_preprocess(
+        X:Union[pd.DataFrame, np.ndarray],
+        y:Union[pd.Series, np.ndarray], 
+        rescale:bool,
+    ) -> Tuple[pd.DataFrame, np.ndarray]:
+    # function to check for the input X and output y
+
+    # make a copy to avoid mutation of input
+    X = X.copy()
+    y = y.copy()
+
+    # check for input X 
+    assert isinstance(X, pd.DataFrame) or isinstance(X, np.ndarray), f"X must be pd.DataFrame/np.ndarry type, but {type(X)} is provided."
+    assert X.ndim == 2, f"Input X must be 2D."
+    if isinstance(X, np.ndarray):
+        X = pd.DataFrame(X, columns=[f"x{i}" for i in range(X.shape[1])])
+    assert X.apply(lambda x: not hasattr(x, "sparse")).all(), f"X cannot be sparse. Please convert them to dense."
+    assert X.apply(lambda x: np.isfinite(x).all() if is_numeric_dtype(x) else x.notna().all()).all(), f"X cannot contain any missing/infinite value."
+
+    # check for output y
+    assert isinstance(y, pd.Series) or isinstance(y, np.ndarray), f"y must be pd.Series/np.ndarray type, but {type(y)} is provided."
+    if isinstance(y, pd.Series):
+        y = y.to_numpy()
+    y = y.squeeze()
+    assert y.ndim == 1, f"Output y must be 1D."
+    assert not hasattr(y, "sparse"), f"y cannot be sparse. Please convert it to dense."
+    assert np.isfinite(y).all(), f"y cannot contain any missing/infinite value."
+    if np.issubdtype(y.dtype, np.number):
+        assert (y != y[0]).any(), f"y must have more than one unique value."
+    else:
+        uniq_y, y = np.unique(y, return_inverse=True)
+        assert uniq_y.size == 2, f"y can only have two values for classification (only binary classification is supported)."
+
+    # check consistent length between X and y
+    assert X.shape[0] == y.size, f"Size of X ({X.shape[0]}) and y ({y.size}) does not match."
+
+    # preprocess for input X if rescale
+    if rescale:
+        for col in X.columns:
+            if is_numeric_dtype(X[col]) and X[col].nunique() > 1:
+                if is_bool_dtype(X[col]) or X[col].isin([0,1]).all():
+                    # make binary input -1/1, see Gelman 
+                    # http://www.stat.columbia.edu/~gelman/research/published/standardizing7.pdf
+                    X[col] = 2.0 * (X[col].astype(np.float32) - 0.5)
+                else:
+                    X[col] = (X[col] - np.mean(X[col])) / np.std(X[col])
+    
+    return X, y
+
+def _check_mc_setting(
+        n_mc: int,
+        twin_mc: bool,
+        y: np.ndarray,
+    ) -> Tuple[int, bool]: 
+    # function to check for using monte carlo subsamples
+
+    # check for n_mc: positive integer and cannot be greater than n
+    n = y.size
+    n_mc = n if n_mc is None else min(n_mc, n)
+    assert isinstance(n_mc, int) and n_mc > 0, f"n_mc ({n_mc}) must be a positive integer."
+
+    # check for twin_mc: twinning subsample is available only when reduction ratio >= 2
+    twin_mc = False if n//n_mc < 2 else twin_mc
+
+    return n_mc, twin_mc
+
+def _check_knn_setting(
+        n_knn: int,
+        approx_knn: bool,
+        y: np.ndarray,
+    ) -> Tuple[int, bool]:
+    # function to check for nearest-neighbor search setting
+
+    # check for n_knn 
+    n_knn = (2 if np.unique(y).size > 2 else 3) if n_knn is None else n_knn
+    assert isinstance(n_knn, int) and n_knn > 0, f"n_knn {(n_knn)} must be a postive integer."
+
+    # approximate nearest-neighbor search is only supported for data size at least 10,000
+    approx_knn = False if y.size < 1e4 else approx_knn
+
+    return n_knn, approx_knn
 
 def _preprocess_input(
         X:pd.DataFrame,
@@ -58,47 +141,44 @@ def _exp_var_knn(
     # argument check for random state
     rng = check_random_state(random_state)
 
-    # argument check for X and y
-    assert isinstance(X, pd.DataFrame), f"X must be pd.DataFrame type, but {type(X)} is provided."
-    assert isinstance(y, np.ndarray), f"y must be np.ndarray type, but {type(y)} is provided."
-    assert X.shape[0] == y.size, f"Size of X ({X.shape[0]}) and y ({y.size}) does not match."
-    n, p = X.shape
-
     # argument check for subset 
     assert isinstance(subset, List), f"subset must be a list of integer."
     if len(subset) > 0:
         assert isinstance(subset[0], int), f"subset must be a list of integer."
     else:
         return np.var(y, ddof=1)
-    
-    # argument check for using subsample
-    if n_mc is None:
-        n_mc = n
-    else:
-        assert isinstance(n_mc, int) and n_mc > 0, f"n_mc ({n_mc}) must be a positive integer."
-        n_mc = min(n_mc, n)
-    # twinning subsample is available only when reduction ratio >= 2
-    twin_mc = False if n//n_mc < 2 else twin_mc
+
+    # argument check for month carlo subsample setting
+    n_mc, twin_mc = _check_mc_setting(n_mc, twin_mc, y)
+
+    # argument check for knn search setting
+    n_knn, approx_knn = _check_knn_setting(n_knn, approx_knn, y)
 
     # check if any row of X duplicate and preprocess categorical features
+    n, p = X.shape
+    # get the subset 
+    X = X.iloc[:,subset].copy()
+    # check if any duplicated rows
+    row_duplicated = False 
     if factor_nunique is None:
-        factor_nunique = X.nunique().values
+        if X.duplicated().any():
+            row_duplicated = True 
     else:
         assert factor_nunique.size == p, f"factor_nunique ({factor_nunique.size}) must be the same size of X ({p})."
         factor_nunique = factor_nunique[subset]
-    X = X.iloc[:,subset].copy()
-    row_duplicated = False
-    if (factor_nunique < n).all():
-        if X.shape[1] > 1:
-            if X.duplicated().any():
+        if (factor_nunique < n).all():
+            if factor_nunique.size > 1:
+                if X.duplicated().any():
+                    row_duplicated = True
+            else:
                 row_duplicated = True
-        else:
-            row_duplicated = True
+    # preprocess categorical features
     X = _preprocess_input(X)
+    # handle duplicated row for nearest-neighbor search
     if row_duplicated:
         # random jittering to have unqiue rows
         X = np.hstack((X, 1e-3*rng.uniform(low=-1,high=1,size=(n,1))))
-        faiss.cvar.distance_compute_blas_threshold = X.shape[0] + 1 # exact computation
+        faiss.cvar.distance_compute_blas_threshold = n + 1 # exact computation
     else:
         faiss.cvar.distance_compute_blas_threshold = 20 # default setting
 
@@ -178,7 +258,7 @@ def TotalSobolKNN(
 
     References
     ----------
-    Huang, C., & Joseph, V. R. (2024). Factor Importance Ranking and Selection using Total Indices. arXiv preprint arXiv:2401.00800.
+    Huang, C., & Joseph, V. R. (2025). Factor Importance Ranking and Selection using Total Indices. Technometrics.
     
     Sobol', I. M. (2001). Global sensitivity indices for nonlinear mathematical models and their Monte Carlo estimates. Mathematics and computers in simulation, 55(1-3), 271-280.
     
@@ -193,64 +273,19 @@ def TotalSobolKNN(
     # argument check for random state
     rng = check_random_state(random_state)  
 
-    # make a copy to avoid mutation of input
-    X = X.copy()
-    y = y.copy()
+    # check X and y, and preprocess
+    X, y = _check_X_y_and_preprocess(X, y, rescale)
 
-    # argument check for X and y
-    assert isinstance(X, pd.DataFrame) or isinstance(X, np.ndarray), f"X must be pd.DataFrame/np.ndarry type, but {type(X)} is provided."
-    assert isinstance(y, pd.Series) or isinstance(y, np.ndarray), f"y must be pd.Series/np.ndarray type, but {type(y)} is provided."
-    if isinstance(y, pd.Series):
-        y = y.values
-    y = y.squeeze()
-    assert X.shape[0] == y.size, f"Size of X ({X.shape[0]}) and y ({y.size}) does not match."
-    assert X.ndim == 2, f"Input X must be 2D."
-    assert y.ndim == 1, f"Output y must be 1D." 
+    # check Monte Carlo subsample setting
+    n_mc, twin_mc = _check_mc_setting(n_mc, twin_mc, y)
+
+    # check knn setting 
+    n_knn, approx_knn = _check_knn_setting(n_knn, approx_knn, y)
+
+    # get basic information for factor
     n, p = X.shape
-    
-    # argument check for using subsample
-    if n_mc is None:
-        n_mc = n
-    else:
-        assert isinstance(n_mc, int) and n_mc > 0, f"n_mc ({n_mc}) must be a positive integer."
-        n_mc = min(n_mc, n)
-    # twinning subsample is available only when reduction ratio >= 2
-    twin_mc = False if n//n_mc < 2 else twin_mc
-    
-    # preprocess for features
-    if isinstance(X, np.ndarray):
-        X = pd.DataFrame(X, columns=[f"x{i}" for i in range(p)])
-    assert not X.dtypes.apply(lambda dt: isinstance(dt, pd.SparseDtype)).any(), f"X cannot be sparse. Please convert them to dense."
-    factor_nunique = X.nunique().values
-    factor_non_constant = []
-    for i in range(p):
-        if factor_nunique[i] > 1:
-            factor_non_constant.append(i)
-            if is_numeric_dtype(X.iloc[:,i]):
-                assert np.isfinite(X.iloc[:,i].values).all(), f"X cannot contain any missing/infinite value."
-                if rescale:
-                    if is_bool_dtype(X.iloc[:,i]): 
-                        # make binary input -1/1, see Gelman 
-                        # http://www.stat.columbia.edu/~gelman/research/published/standardizing7.pdf
-                        X.iloc[:,i] = 2.0 * (X.iloc[:,i].astype(np.float32) - 0.5)
-                    else:
-                        if (X.iloc[:,i].isin([0,1]).all()): # check for implicit binary input
-                            X.iloc[:,i] = 2.0 * (X.iloc[:,i].astype(np.float32) - 0.5)
-                        else:
-                            X.iloc[:,i] = (X.iloc[:,i] - np.mean(X.iloc[:,i])) / np.std(X.iloc[:,i])
-            else:
-                assert not X.iloc[:,i].isnull().any(), f"X cannot contain any missing value."
-    assert not hasattr(y, "sparse"), f"y cannot be sparse. Please convert it to dense."
-    assert np.isfinite(y).all(), f"y cannot contain any missing/infinite value."
-    assert np.unique(y).size > 1, f"y must have more than one unique value."
-
-    # setting n_knn if no value is provided
-    if n_knn is None:
-        n_knn = 2 if np.unique(y).size > 2 else 3
-    n_knn = int(n_knn)
-    assert isinstance(n_knn, int) and n_knn > 0, f"n_knn {(n_knn)} must be a postive integer."
-    # approximate nearest-neighbor search is only supported for data size at least 10,000
-    approx_knn = False if n < 1e4 else approx_knn
+    factor_nunique = X.nunique().to_numpy()
+    factor_non_constant = [i for i in range(p) if factor_nunique[i] > 1]
     
     # compute total Sobol' indices
     if noise:
@@ -288,6 +323,143 @@ def TotalSobolKNN(
 
     return tsi
 
+def ShapleySobolKNN(
+        X:Union[pd.DataFrame, np.ndarray], 
+        y:Union[pd.Series, np.ndarray], 
+        noise:bool, 
+        n_knn:int = None, 
+        approx_knn:bool = False, 
+        n_mc:int = None, 
+        twin_mc:bool = False, 
+        rescale:bool = True,
+        n_jobs:int = 1,
+        random_state:Union[int,np.random.RandomState] = None,
+    ) -> np.ndarray:
+
+    """Estimating Shapley Sobol' Effect from Data 
+
+    `ShapleySobolKNN` provides consistent estimation of Shapley Sobol' Effect (Owen, 2014; Song et al., 2016) directly from scattered data. When the responses are noiseless (`noise=False`), it implements the Nearest-Neighbor estimator in Broto et al. (2020). When the responses are noisy (`noise=True`), it implements the Noise-Adjusted Nearest-Neighbor estimator in Huang and Joseph (2024).
+
+    Parameters
+    ----------
+    X : pd.DataFrame or np.ndarray
+        A pd.DataFrame or np.ndarray for the factors / predictors.
+    
+    y : pd.Series or np.ndarray
+        A pd.Series or np.ndarray for the responses. 
+    
+    noise : bool
+        A logical indicating whether the responses are noisy.
+    
+    n_knn : int, default=None
+        The number of nearest-neighbor for the inner loop conditional variance estimation. `n_knn=2` is recommended for regression, and `n_knn=3` for binary classification.
+    
+    approx_knn : bool, default=False
+        A logical indicating whether to use approximate nearest-neighbor search, otherwise exact search is used. It is supported when there are at least 10,000 data instances.
+    
+    n_mc : int, default=None 
+        The number of Monte Carlo samples for the outer loop expectation estimation.
+    
+    twin_mc : bool, default=False
+        A logical indicating whether to use twinning subsamples, otherwise random subsamples are used. It is supported when the reduction ratio is at least 2. 
+    
+    rescale : bool, default=True
+        A logical indicating whether to standardize the factors / predictors.
+    
+    n_jobs : int, default=1
+        The number of jobs to run in parallel. `n_jobs=-1` means using all processors.
+    
+    random_state : int or RandomState instance, default=None
+        A seed for controlling the randomness in breaking ties in nearest-neighbor search and finding random subsamples.
+
+    Returns
+    ----------
+    np.ndarray
+        A numeric vector for the Shapley Sobol' effect estimation.
+
+    Notes
+    -----
+    `Faiss` (Douze et al., 2024) is used for efficient nearest-neighbor search, with the approximate search (`approx_knn=True`) by the inverted file index (IVF). IVF reduces the search scope through first clustering data into Voronoi cells. To further accelerate, we also support the use of subsamples by specifying `n_mc`. Both random and twinning (Vakayil and Joseph, 2022) subsamples are available, where twinning subsamples provide better approximation for the full data. 
+
+    References
+    ----------
+    Huang, C., & Joseph, V. R. (2025). Factor Importance Ranking and Selection using Total Indices. Technometrics.
+    
+    Owen, A. B. (2014), “Sobol’indices and Shapley value,” SIAM/ASA Journal on Uncertainty Quantification, 2, 245–251.
+
+    Song, E., Nelson, B. L., & Staum, J. (2016), “Shapley effects for global sensitivity analysis: Theory and computation,” SIAM/ASA Journal on Uncertainty Quantification, 4, 1060-1083.
+    
+    Broto, B., Bachoc, F., & Depecker, M. (2020). Variance reduction for estimation of Shapley effects and adaptation to unknown input distribution. SIAM/ASA Journal on Uncertainty Quantification, 8(2), 693-716.
+    
+    Douze, M., Guzhva, A., Deng, C., Johnson, J., Szilvasy, G., Mazaré, P.E., Lomeli, M., Hosseini, L., & Jégou, H., (2024). The Faiss library. arXiv preprint arXiv:2401.08281.
+    
+    Vakayil, A., & Joseph, V. R. (2022). Data twinning. Statistical Analysis and Data Mining: The ASA Data Science Journal, 15(5), 598-610.
+
+    """
+
+    # argument check for random state
+    rng = check_random_state(random_state)  
+
+    # check X and y, and preprocess
+    X, y = _check_X_y_and_preprocess(X, y, rescale)
+
+    # check Monte Carlo subsample setting
+    n_mc, twin_mc = _check_mc_setting(n_mc, twin_mc, y)
+
+    # check knn setting 
+    n_knn, approx_knn = _check_knn_setting(n_knn, approx_knn, y)
+
+    # get basic information for factor
+    n, p = X.shape
+    factor_nunique = X.nunique().to_numpy()
+    factor_non_constant = [i for i in range(p) if factor_nunique[i] > 1]
+    
+    # compute Shapley Sobol' Effect
+    if noise:
+        noise_var = _exp_var_knn(
+            X = X,
+            y = y,
+            subset = factor_non_constant,
+            factor_nunique = factor_nunique,
+            n_knn = n_knn, 
+            approx_knn = approx_knn,
+            n_mc = n_mc, 
+            twin_mc = twin_mc,
+            random_state = rng.randint(1e9, size=1)[0],
+        )
+    else:
+        noise_var = 0    
+    y_var = np.var(y,ddof=1)
+    if y_var < noise_var:
+        # noise dominated, no factor is important
+        ssi = np.zeros(p) 
+    else:
+        q = len(factor_non_constant) # number of non-constant factors
+        u = [[bool(int(bit)) for bit in format(i, f'0{q}b')[::-1]] for i in range(2**q-1)]
+        seeds = rng.randint(1e9, size=2**q-1)
+        nx_var = Parallel(n_jobs=n_jobs,prefer='threads')(delayed(_exp_var_knn)(
+            X = X,
+            y = y,
+            subset = [ind for ind, flag in zip(factor_non_constant, u[i]) if flag],
+            factor_nunique = factor_nunique,
+            n_knn = n_knn, 
+            approx_knn = approx_knn,
+            n_mc = n_mc, 
+            twin_mc = twin_mc,
+            random_state = seeds[i],
+        ) for i in range(2**q-1))
+        nx_var = np.array(nx_var + [noise_var])
+        x_var = np.maximum(y_var - nx_var, 0.0)
+        ssi = np.zeros(p)
+        for i in range(p):
+            for s in range(0, 2**p, 2**(i+1)):
+                for l in range(s, s+2**i):
+                    cardu = sum(u[l])
+                    ssi[i] += (x_var[l+2**i] - x_var[l]) / comb(q-1, cardu)
+        ssi = ssi / p / (y_var - noise_var)
+
+    return ssi 
+
 def FIRST(
         X:Union[pd.DataFrame, np.ndarray], 
         y:Union[pd.Series, np.ndarray], 
@@ -299,6 +471,7 @@ def FIRST(
         n_forward:int = 2,
         n_jobs:int = 1,
         random_state:Union[int,np.random.RandomState] = None,
+        return_option:str = 'selection',
         verbose:bool = False,
     ) -> np.ndarray:
 
@@ -339,14 +512,17 @@ def FIRST(
     
     random_state : int or RandomState instance, default=None
         A seed for controlling the randomness in breaking ties in nearest-neighbor search and finding random subsamples.
+
+    return_option : str, default='selection'
+        The options for the output of `FIRST`. Default is `selection`, which returns a binary vector indicating the factor selection, with `True` for selected variables and `False` otherwise. Other options include: (i) `total`, which return a numeric vector for total Sobol' effect and (ii) `shapley`, which return a numeric vector for Shapley Sobol' effect. See Huang and Joseph (2024) for details.
     
-    verbose : default = False
+    verbose : bool, default=False
         A logical indicating whether to display intermediate results, e.g., the selected factor from each iteration.
 
     Returns
     ----------
     np.ndarray
-        A numeric vector for the factor importance, with zero indicating that the factor is not important for predicting the response.
+        A numeric vector for the factor selection, importance, or ranking depending on the value of the `return_option` argument. 
 
     Notes
     -----
@@ -358,7 +534,7 @@ def FIRST(
 
     References
     ----------
-    Huang, C., & Joseph, V. R. (2024). Factor Importance Ranking and Selection using Total Indices. arXiv preprint arXiv:2401.00800.
+    Huang, C., & Joseph, V. R. (2025). Factor Importance Ranking and Selection using Total Indices. Technometrics.
     
     Sobol', I. M. (2001). Global sensitivity indices for nonlinear mathematical models and their Monte Carlo estimates. Mathematics and computers in simulation, 55(1-3), 271-280.
     
@@ -377,70 +553,22 @@ def FIRST(
     # argument check for random state
     rng = check_random_state(random_state)
 
-    # make a copy to avoid mutation of input
-    X = X.copy()
-    y = y.copy()
+    # check X and y, and preprocess
+    X, y = _check_X_y_and_preprocess(X, y, rescale)
 
-    # argument check for X and y
-    assert isinstance(X, pd.DataFrame) or isinstance(X, np.ndarray), f"X must be pd.DataFrame/np.ndarry type, but {type(X)} is provided."
-    assert isinstance(y, pd.Series) or isinstance(y, np.ndarray), f"y must be pd.Series/np.ndarray type, but {type(y)} is provided."
-    if isinstance(y, pd.Series):
-        y = y.values
-    y = y.squeeze()
-    assert X.shape[0] == y.size, f"Size of X ({X.shape[0]}) and y ({y.size}) does not match."
-    assert X.ndim == 2, f"Input X must be 2D."
-    assert y.ndim == 1, f"Output y must be 1D."  
+    # check Monte Carlo subsample setting
+    n_mc, twin_mc = _check_mc_setting(n_mc, twin_mc, y)
+
+    # check knn setting 
+    n_knn, approx_knn = _check_knn_setting(n_knn, approx_knn, y)
+
+    # check return option
+    assert return_option in ['selection','total','shapley'], f"return_option ({return_option}) is not available, only selection/total/shapley/ranking is supported."
+
+    # get basic information for factor
     n, p = X.shape
-    
-    # argument check for using subsample
-    if n_mc is None:
-        n_mc = n
-    else:
-        assert isinstance(n_mc, int) and n_mc > 0, f"n_mc ({n_mc}) must be a positive integer."
-        n_mc = min(n_mc, n)
-    # twinning subsample is available only when reduction ratio >= 2
-    twin_mc = False if n//n_mc < 2 else twin_mc
-            
-    # preprocess for features
-    if isinstance(X, np.ndarray):
-        X = pd.DataFrame(X, columns=[f"x{i}" for i in range(p)])
-    assert not X.dtypes.apply(lambda dt: isinstance(dt, pd.SparseDtype)).any(), f"X cannot be sparse. Please convert them to dense."
-    factor_nunique = X.nunique().values
-    factor_non_constant = []
-    for i in range(p):
-        if factor_nunique[i] > 1:
-            factor_non_constant.append(i)
-            if is_numeric_dtype(X.iloc[:,i]):
-                assert np.isfinite(X.iloc[:,i].values).all(), f"X cannot contain any missing/infinite value."
-                if rescale:
-                    if is_bool_dtype(X.iloc[:,i]): 
-                        # make binary input -1/1, see Gelman 
-                        # http://www.stat.columbia.edu/~gelman/research/published/standardizing7.pdf
-                        X.iloc[:,i] = 2.0 * (X.iloc[:,i].astype(np.float32) - 0.5)
-                    else:
-                        if (X.iloc[:,i].isin([0,1]).all()): # check for implicit binary input
-                            X.iloc[:,i] = 2.0 * (X.iloc[:,i].astype(np.float32) - 0.5)
-                        else:
-                            X.iloc[:,i] = (X.iloc[:,i] - np.mean(X.iloc[:,i])) / np.std(X.iloc[:,i])
-            else:
-                assert not X.iloc[:,i].isnull().any(), f"X cannot contain any missing value."
-    assert not hasattr(y, "sparse"), f"y cannot be sparse. Please convert it to dense."
-    assert np.isfinite(y).all(), f"y cannot contain any missing/infinite value."
-    assert np.unique(y).size > 1, f"y must have more than one unique value."
-
-    # setting n_knn if no value is provided
-    if n_knn is None:
-        if np.unique(y).size > 2:
-            n_knn = 2
-            if verbose:
-                print("y has more than two unique values, setting it to regression problem with suggested n_knn = 2.\n")
-        else:
-            n_knn = 3
-            if verbose:
-                print("y has only two unique values, setting it to binary classification problem with suggested n_knn = 3.\n")
-    assert isinstance(n_knn, int) and n_knn > 0, f"n_knn {(n_knn)} must be a postive integer."
-    # approximate nearest-neighbor search is only supported for data size at least 10,000
-    approx_knn = False if n < 1e4 else approx_knn
+    factor_nunique = X.nunique().to_numpy()
+    factor_non_constant = [i for i in range(p) if factor_nunique[i] > 1]
     
     # forward selection 
     if verbose:
@@ -451,7 +579,7 @@ def FIRST(
     subset = []
     x_var_max = 0
     for t in range(n_forward):
-        if verbose:
+        if verbose: 
             print(f"\nPhase-{(t+1):d} Forward Selection...")
         none_added_to_subset = True
         candidate = [i for i in factor_non_constant if i not in subset]
@@ -483,14 +611,14 @@ def FIRST(
                 subset.append(add_ind)
                 none_added_to_subset = False
                 x_var_max = x_var.max()
-                if verbose:
+                if verbose: 
                     print(f"add candidate {add_ind:d}({x_var_max:.3f}).")
             else:
                 break
         if none_added_to_subset:
-            if verbose:
+            if verbose: 
                 print("early termination since none of the candidates can be added in this phase.")
-                break
+            break
     
     # backward elimination
     if verbose:
@@ -521,7 +649,7 @@ def FIRST(
             remove_ind = subset[np.argmax(x_var)]
             subset.remove(remove_ind)
             x_var_max = x_var.max()
-            if verbose:
+            if verbose: 
                 print(f"remove candidate {remove_ind:d}({x_var_max:.3f}).") 
         else:
             break
@@ -531,8 +659,30 @@ def FIRST(
     if len(subset) > 0:
         noise_var = y_var - x_var_max
         imp[subset] = (nx_var - noise_var) / x_var_max
-    
-    return imp
+    # get the indices for selection
+    selection = (imp > 0).astype(bool)
+
+    if return_option == "selection":
+        return selection 
+    elif return_option == "total":
+        return imp 
+    elif return_option == "shapley":
+        shapley_imp = np.zeros(p)
+        shapley_imp[selection] = ShapleySobolKNN(
+            X = X.loc[:,selection].copy(),
+            y = y,
+            noise = True,
+            n_knn = n_knn,
+            approx_knn = approx_knn,
+            n_mc = n_mc,
+            twin_mc = twin_mc,
+            rescale = rescale,
+            n_jobs = n_jobs,
+            random_state = random_state,
+        )
+        return shapley_imp 
+    else:
+        return None
 
 class SelectByFIRST(SelectorMixin, BaseEstimator):
     
@@ -562,6 +712,9 @@ class SelectByFIRST(SelectorMixin, BaseEstimator):
     
     random_state : int or RandomState instance, default=None
         A seed for controlling the randomness in breaking ties in nearest-neighbor search and finding random subsamples.
+
+    importance_option : str, default='total'
+        The options for the feature importance. Default is `total`, which returns a numeric vector for total Sobol' effect and `shapley` for Shapley Sobol' effect. See Huang and Joseph (2024) for details.
     
     verbose : default = False
         A logical indicating whether to display intermediate results, e.g., the selected factor from each iteration.
@@ -581,7 +734,7 @@ class SelectByFIRST(SelectorMixin, BaseEstimator):
 
     References
     ----------
-    Huang, C., & Joseph, V. R. (2024). Factor Importance Ranking and Selection using Total Indices. arXiv preprint arXiv:2401.00800.
+    Huang, C., & Joseph, V. R. (2025). Factor Importance Ranking and Selection using Total Indices. Technometrics.
     
     Sobol', I. M. (2001). Global sensitivity indices for nonlinear mathematical models and their Monte Carlo estimates. Mathematics and computers in simulation, 55(1-3), 271-280.
     
@@ -604,19 +757,19 @@ class SelectByFIRST(SelectorMixin, BaseEstimator):
             n_forward:int = 2,
             n_jobs:int = 1,
             random_state:Union[int,np.random.RandomState] = None,
+            importance_option:str = 'total',
             verbose:bool = False,
         ):
         
-        if (n_knn is None):
-            n_knn = 2 if regression else 3
-        self.n_knn = n_knn
-        self.approx_knn = approx_knn
         self.regression = regression
+        self.n_knn = (2 if regression else 3) if n_knn is None else n_knn
+        self.approx_knn = approx_knn
         self.rescale = rescale
         self.n_forward = n_forward
         self.n_jobs = n_jobs
         self.random_state = check_random_state(random_state)
         self.verbose = verbose
+        self.importance_option = importance_option
     
     def fit(
             self, 
@@ -671,6 +824,7 @@ class SelectByFIRST(SelectorMixin, BaseEstimator):
             n_forward = self.n_forward,
             n_jobs = self.n_jobs,
             random_state = self.random_state, 
+            return_option = self.importance_option,
             verbose = self.verbose,
         )
 

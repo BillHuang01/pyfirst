@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0 (05/10/2025)
+
+- Add ShapleySobolKNN function
+
 ## 0.1.4 (08/05/2025)
 
 - Fix the binary classification error from using SelectByFIRST

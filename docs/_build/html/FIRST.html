@@ -68,6 +68,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="SelectByFIRST.html">SelectByFIRST</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ShapleySobolKNN.html">ShapleySobolKNN</a></li>
 <li class="toctree-l1"><a class="reference internal" href="TotalSobolKNN.html">TotalSobolKNN</a></li>
 <li class="toctree-l1"><a class="reference internal" href="changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="autoapi/index.html">API Reference</a></li>
@@ -143,8 +144,8 @@ $$</p>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([0.2648618 , 0.2387856 , 0.07689935, 0.32580823, 0.0700073 ,
-       0.        , 0.        , 0.        , 0.        , 0.        ])
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([ True,  True,  True,  True,  True, False, False, False, False,
+       False])
 </pre></div>
 </div>
 </div>
@@ -161,9 +162,7 @@ $$</p>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>y has more than two unique values, setting it to regression problem with suggested n_knn = 2.
-
-Starting forward selection...
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>Starting forward selection...
 
 Phase-1 Forward Selection...
 </pre></div>
@@ -184,14 +183,14 @@ add candidate 0(13.588).
 current variance explained: 13.588
 candidate to add: 1(20.105) 2(16.034) 4(15.731) 5(13.345) 7(13.543)
 add candidate 1(20.105).
-</pre></div>
-</div>
-<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>current selection: 3 0 1
+
+current selection: 3 0 1
 current variance explained: 20.105
 candidate to add: 2(22.122) 4(21.959)
 add candidate 2(22.122).
-
-current selection: 3 0 1 2
+</pre></div>
+</div>
+<div class="output stream highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>current selection: 3 0 1 2
 current variance explained: 22.122
 candidate to add: 4(23.788)
 add candidate 4(23.788).
@@ -212,8 +211,8 @@ current variance explained: 23.788
 candidate to remove: 0(17.487) 1(18.108) 2(21.959) 3(16.038) 4(22.122)
 </pre></div>
 </div>
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([0.2648618 , 0.2387856 , 0.07689935, 0.32580823, 0.0700073 ,
-       0.        , 0.        , 0.        , 0.        , 0.        ])
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([ True,  True,  True,  True,  True, False, False, False, False,
+       False])
 </pre></div>
 </div>
 </div>
@@ -231,8 +230,8 @@ candidate to remove: 0(17.487) 1(18.108) 2(21.959) 3(16.038) 4(22.122)
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([0.2648618 , 0.2387856 , 0.07689935, 0.32580823, 0.0700073 ,
-       0.        , 0.        , 0.        , 0.        , 0.        ])
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([ True,  True,  True,  True,  True, False, False, False, False,
+       False])
 </pre></div>
 </div>
 </div>
@@ -248,8 +247,8 @@ candidate to remove: 0(17.487) 1(18.108) 2(21.959) 3(16.038) 4(22.122)
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([0.2648618 , 0.23877103, 0.07689935, 0.32580823, 0.0700073 ,
-       0.        , 0.        , 0.        , 0.        , 0.        ])
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([ True,  True,  True,  True,  True, False, False, False, False,
+       False])
 </pre></div>
 </div>
 </div>
@@ -267,8 +266,8 @@ candidate to remove: 0(17.487) 1(18.108) 2(21.959) 3(16.038) 4(22.122)
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([0.26198021, 0.23528031, 0.07956943, 0.34468169, 0.06488056,
-       0.        , 0.        , 0.        , 0.        , 0.        ])
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([ True,  True,  True,  True,  True, False, False, False, False,
+       False])
 </pre></div>
 </div>
 </div>
@@ -283,8 +282,8 @@ candidate to remove: 0(17.487) 1(18.108) 2(21.959) 3(16.038) 4(22.122)
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([0.26132392, 0.22754917, 0.06887766, 0.31153919, 0.06237415,
-       0.        , 0.        , 0.        , 0.        , 0.        ])
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([ True,  True,  True,  True,  True, False, False, False, False,
+       False])
 </pre></div>
 </div>
 </div>
@@ -302,8 +301,8 @@ candidate to remove: 0(17.487) 1(18.108) 2(21.959) 3(16.038) 4(22.122)
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([0.27360209, 0.30479748, 0.08815202, 0.34269827, 0.08091292,
-       0.        , 0.        , 0.        , 0.        , 0.        ])
+<div class="output text_plain highlight-myst-ansi notranslate"><div class="highlight"><pre><span></span>array([ True,  True,  True,  True,  True, False, False, False, False,
+       False])
 </pre></div>
 </div>
 </div>
@@ -313,7 +312,7 @@ candidate to remove: 0(17.487) 1(18.108) 2(21.959) 3(16.038) 4(22.122)
 </section>
 <section id="references">
 <h2>References<a class="headerlink" href="#references" title="Link to this heading"></a></h2>
-<p>Huang, C., &amp; Joseph, V. R. (2024). Factor Importance Ranking and Selection using Total Indices. arXiv preprint arXiv:2401.00800.</p>
+<p>Huang, C., &amp; Joseph, V. R. (2025). Factor Importance Ranking and Selection using Total Indices. Technometrics.</p>
 <p>Borboudakis, G., &amp; Tsamardinos, I. (2019). Forward-backward selection with early dropping. The Journal of Machine Learning Research, 20(1), 276-314.</p>
 <p>Yu, K., Guo, X., Liu, L., Li, J., Wang, H., Ling, Z., &amp; Wu, X. (2020). Causality-based feature selection: Methods and evaluations. ACM Computing Surveys (CSUR), 53(5), 1-36.</p>
 <p>Douze, M., Guzhva, A., Deng, C., Johnson, J., Szilvasy, G., Mazaré, P.E., Lomeli, M., Hosseini, L., &amp; Jégou, H., (2024). The Faiss library. arXiv preprint arXiv:2401.08281.</p>
