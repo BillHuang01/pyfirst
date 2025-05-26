@@ -450,13 +450,15 @@ def ShapleySobolKNN(
         ) for i in range(2**q-1))
         nx_var = np.array(nx_var + [noise_var])
         x_var = np.maximum(y_var - nx_var, 0.0)
-        ssi = np.zeros(p)
-        for i in range(p):
-            for s in range(0, 2**p, 2**(i+1)):
+        ssi_non_constant = np.zeros(q)
+        for i in range(q):
+            for s in range(0, 2**q, 2**(i+1)):
                 for l in range(s, s+2**i):
                     cardu = sum(u[l])
-                    ssi[i] += (x_var[l+2**i] - x_var[l]) / comb(q-1, cardu)
-        ssi = ssi / p / (y_var - noise_var)
+                    ssi_non_constant[i] += (x_var[l+2**i] - x_var[l]) / comb(q-1, cardu)
+        ssi_non_constant = ssi_non_constant / q / (y_var - noise_var)
+        ssi = np.zeros(p)
+        ssi[factor_non_constant] = ssi_non_constant
 
     return ssi 
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.1 (05/26/2025)
+
+- Fix a bug for ShapleySobolKNN function when a column is a constant
+
 ## 1.0.0 (05/10/2025)
 
 - Add ShapleySobolKNN function

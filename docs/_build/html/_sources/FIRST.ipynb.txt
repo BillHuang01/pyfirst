@@ -75,8 +75,8 @@
     {
      "data": {
       "text/plain": [
-       "array([0.2648618 , 0.2387856 , 0.07689935, 0.32580823, 0.0700073 ,\n",
-       "       0.        , 0.        , 0.        , 0.        , 0.        ])"
+       "array([ True,  True,  True,  True,  True, False, False, False, False,\n",
+       "       False])"
       ]
      },
      "execution_count": 4,
@@ -113,8 +113,6 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "y has more than two unique values, setting it to regression problem with suggested n_knn = 2.\n",
-      "\n",
       "Starting forward selection...\n",
       "\n",
       "Phase-1 Forward Selection...\n",
@@ -161,8 +159,8 @@
     {
      "data": {
       "text/plain": [
-       "array([0.2648618 , 0.2387856 , 0.07689935, 0.32580823, 0.0700073 ,\n",
-       "       0.        , 0.        , 0.        , 0.        , 0.        ])"
+       "array([ True,  True,  True,  True,  True, False, False, False, False,\n",
+       "       False])"
       ]
      },
      "execution_count": 5,
@@ -198,8 +196,8 @@
     {
      "data": {
       "text/plain": [
-       "array([0.2648618 , 0.2387856 , 0.07689935, 0.32580823, 0.0700073 ,\n",
-       "       0.        , 0.        , 0.        , 0.        , 0.        ])"
+       "array([ True,  True,  True,  True,  True, False, False, False, False,\n",
+       "       False])"
       ]
      },
      "execution_count": 6,
@@ -228,8 +226,8 @@
     {
      "data": {
       "text/plain": [
-       "array([0.2648618 , 0.23877103, 0.07689935, 0.32580823, 0.0700073 ,\n",
-       "       0.        , 0.        , 0.        , 0.        , 0.        ])"
+       "array([ True,  True,  True,  True,  True, False, False, False, False,\n",
+       "       False])"
       ]
      },
      "execution_count": 7,
@@ -265,8 +263,8 @@
     {
      "data": {
       "text/plain": [
-       "array([0.26198021, 0.23528031, 0.07956943, 0.34468169, 0.06488056,\n",
-       "       0.        , 0.        , 0.        , 0.        , 0.        ])"
+       "array([ True,  True,  True,  True,  True, False, False, False, False,\n",
+       "       False])"
       ]
      },
      "execution_count": 8,
@@ -293,8 +291,8 @@
     {
      "data": {
       "text/plain": [
-       "array([0.26132392, 0.22754917, 0.06887766, 0.31153919, 0.06237415,\n",
-       "       0.        , 0.        , 0.        , 0.        , 0.        ])"
+       "array([ True,  True,  True,  True,  True, False, False, False, False,\n",
+       "       False])"
       ]
      },
      "execution_count": 9,
@@ -323,8 +321,8 @@
     {
      "data": {
       "text/plain": [
-       "array([0.27360209, 0.30479748, 0.08815202, 0.34269827, 0.08091292,\n",
-       "       0.        , 0.        , 0.        , 0.        , 0.        ])"
+       "array([ True,  True,  True,  True,  True, False, False, False, False,\n",
+       "       False])"
       ]
      },
      "execution_count": 10,
@@ -341,7 +339,7 @@
    "cell_type": "markdown",
    "metadata": {},
    "source": [
-    "For more details about `FIRST`, please Huang and Joseph (2024)."
+    "For more details about `FIRST`, please Huang and Joseph (2025)."
    ]
   },
   {

@@ -1,6 +1,6 @@
 # FIRST: Factor Importance Ranking and Selection for Total Indices
 
-A ``Python3`` module of FIRST, a model-independent factor importance ranking and selection procedure that is based on total Sobol' indices ([Huang and Joseph, 2024][1]). This research is supported by U.S. National Science Foundation grants *DMS-2310637* and *DMREF-1921873*. The ``R`` implementation is also available on [CRAN][2]. 
+A ``Python3`` module of FIRST, a model-independent factor importance ranking and selection procedure that is based on total Sobol' indices ([Huang and Joseph, 2025][1]). This research is supported by U.S. National Science Foundation grants *DMS-2310637* and *DMREF-1921873*. The ``R`` implementation is also available on [CRAN][2]. 
 
 ## Installation
 
@@ -60,7 +60,7 @@ For more details, please see [![Open In Colab](https://colab.research.google.com
 
 ### Total Sobol' Indices Estimation
 
-This module also provides the function ``TotalSobolKNN`` for a consistent estimation of total Sobol' indices ([Sobol', 2001][5]) directly from scattered data. When the response is noiseless, ``TotalSobolKNN`` implements the Nearest-Neighbor estimator from [Broto et al. (2020)][6]. For noisy response, ``TotalSobolKNN`` implements the Noise-Adjusted Nearest-Neighbor estimator from [Huang and Joseph (2024)][1]. ``TotalSobolKNN`` returns a numpy ndarray for the total Sobol' indices estimation.
+This module also provides the function ``TotalSobolKNN`` for a consistent estimation of total Sobol' indices ([Sobol', 2001][5]) directly from scattered data. When the response is noiseless, ``TotalSobolKNN`` implements the Nearest-Neighbor estimator from [Broto et al. (2020)][6]. For noisy response, ``TotalSobolKNN`` implements the Noise-Adjusted Nearest-Neighbor estimator from [Huang and Joseph (2025)][1]. ``TotalSobolKNN`` returns a numpy ndarray for the total Sobol' indices estimation.
 
 ```python
 from pyfirst import TotalSobolKNN
@@ -74,7 +74,7 @@ For more details and applications, please see [![Open In Colab](https://colab.re
 
 ### Shapley Sobol' Indices Estimation
 
-This module also provides the function ``ShapleySobolKNN`` for a consistent estimation of Shapley Sobol' indices ([Owen, 2014][16]; [Song et al., 2016][17]) directly from scattered data. When the response is noiseless, ``ShapleySobolKNN`` implements the Nearest-Neighbor estimator from [Broto et al. (2020)][6]. For noisy response, ``ShapleySobolKNN`` implements the Noise-Adjusted Nearest-Neighbor estimator from [Huang and Joseph (2024)][1]. ``ShapleySobolKNN`` returns a numpy ndarray for the Shapley Sobol' indices estimation.
+This module also provides the function ``ShapleySobolKNN`` for a consistent estimation of Shapley Sobol' indices ([Owen, 2014][16]; [Song et al., 2016][17]) directly from scattered data. When the response is noiseless, ``ShapleySobolKNN`` implements the Nearest-Neighbor estimator from [Broto et al. (2020)][6]. For noisy response, ``ShapleySobolKNN`` implements the Noise-Adjusted Nearest-Neighbor estimator from [Huang and Joseph (2025)][1]. ``ShapleySobolKNN`` returns a numpy ndarray for the Shapley Sobol' indices estimation.
 
 ```python
 from pyfirst import ShapleySobolKNN
