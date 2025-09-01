@@ -91,7 +91,7 @@ For more details and applications, please see [![Open In Colab](https://colab.re
 This module also provides the function ``FIRSTRank`` for factor importance ranking via maximizing cumulative variance that can be explained. Please see [Huang and Joseph (2025)][1] for details.
 
 ```python
-from pyfirst import ShapleySobolKNN
+from pyfirst import FIRSTRank
 from sklearn.datasets import make_friedman1
 
 X, y = make_friedman1(n_samples=10000, n_features=5, noise=1.0, random_state=43)
