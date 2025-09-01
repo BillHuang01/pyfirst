@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.2 (08/31/2025)
+
+- Add FIRSTRank
+
 ## 1.0.1 (05/26/2025)
 
 - Fix a bug for ShapleySobolKNN function when a column is a constant
