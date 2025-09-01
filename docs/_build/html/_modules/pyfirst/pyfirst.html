@@ -84,13 +84,13 @@
 <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">comb</span>
 <span class="kn">from</span> <span class="nn">joblib</span> <span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
 <span class="kn">from</span> <span class="nn">pandas.api.types</span> <span class="kn">import</span> <span class="n">is_numeric_dtype</span><span class="p">,</span> <span class="n">is_bool_dtype</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 <span class="kn">from</span> <span class="nn">sklearn.base</span> <span class="kn">import</span> <span class="n">BaseEstimator</span>
 <span class="kn">from</span> <span class="nn">sklearn.feature_selection._base</span> <span class="kn">import</span> <span class="n">SelectorMixin</span>
 <span class="kn">from</span> <span class="nn">sklearn.utils</span> <span class="kn">import</span> <span class="n">check_random_state</span>
 <span class="kn">from</span> <span class="nn">sklearn.utils.validation</span> <span class="kn">import</span> <span class="n">check_is_fitted</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;TotalSobolKNN&#39;</span><span class="p">,</span> <span class="s1">&#39;ShapleySobolKNN&#39;</span><span class="p">,</span> <span class="s1">&#39;FIRST&#39;</span><span class="p">,</span> <span class="s1">&#39;SelectByFIRST&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;TotalSobolKNN&#39;</span><span class="p">,</span> <span class="s1">&#39;ShapleySobolKNN&#39;</span><span class="p">,</span> <span class="s1">&#39;FIRSTRank&#39;</span><span class="p">,</span> <span class="s1">&#39;FIRST&#39;</span><span class="p">,</span> <span class="s1">&#39;SelectByFIRST&#39;</span><span class="p">]</span>
 
 <span class="k">def</span> <span class="nf">_check_X_y_and_preprocess</span><span class="p">(</span>
         <span class="n">X</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
@@ -545,6 +545,159 @@
         <span class="n">ssi</span><span class="p">[</span><span class="n">factor_non_constant</span><span class="p">]</span> <span class="o">=</span> <span class="n">ssi_non_constant</span>
 
     <span class="k">return</span> <span class="n">ssi</span> </div>
+
+
+
+<div class="viewcode-block" id="FIRSTRank">
+<a class="viewcode-back" href="../../autoapi/pyfirst/pyfirst/index.html#pyfirst.FIRSTRank">[docs]</a>
+<span class="k">def</span> <span class="nf">FIRSTRank</span><span class="p">(</span>
+        <span class="n">X</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> 
+        <span class="n">y</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> 
+        <span class="n">noise</span><span class="p">:</span><span class="nb">bool</span><span class="p">,</span> 
+        <span class="n">n_knn</span><span class="p">:</span><span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+        <span class="n">approx_knn</span><span class="p">:</span><span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> 
+        <span class="n">n_mc</span><span class="p">:</span><span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+        <span class="n">twin_mc</span><span class="p">:</span><span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> 
+        <span class="n">rescale</span><span class="p">:</span><span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">n_jobs</span><span class="p">:</span><span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">random_state</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Provides Factor Ranking via Cumulative Variance that can be explained. </span>
+
+<span class="sd">    `FIRSTRank` provides factor ranking directly from scattered data via cumulative variance that can be explained. See Huang and Joseph (2025) for details.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    X : pd.DataFrame or np.ndarray</span>
+<span class="sd">        A pd.DataFrame or np.ndarray for the factors / predictors.</span>
+<span class="sd">    </span>
+<span class="sd">    y : pd.Series or np.ndarray</span>
+<span class="sd">        A pd.Series or np.ndarray for the responses. </span>
+<span class="sd">    </span>
+<span class="sd">    noise : bool</span>
+<span class="sd">        A logical indicating whether the responses are noisy.</span>
+<span class="sd">    </span>
+<span class="sd">    n_knn : int, default=None</span>
+<span class="sd">        The number of nearest-neighbor for the inner loop conditional variance estimation. `n_knn=2` is recommended for regression, and `n_knn=3` for binary classification.</span>
+<span class="sd">    </span>
+<span class="sd">    approx_knn : bool, default=False</span>
+<span class="sd">        A logical indicating whether to use approximate nearest-neighbor search, otherwise exact search is used. It is supported when there are at least 10,000 data instances.</span>
+<span class="sd">    </span>
+<span class="sd">    n_mc : int, default=None </span>
+<span class="sd">        The number of Monte Carlo samples for the outer loop expectation estimation.</span>
+<span class="sd">    </span>
+<span class="sd">    twin_mc : bool, default=False</span>
+<span class="sd">        A logical indicating whether to use twinning subsamples, otherwise random subsamples are used. It is supported when the reduction ratio is at least 2. </span>
+<span class="sd">    </span>
+<span class="sd">    rescale : bool, default=True</span>
+<span class="sd">        A logical indicating whether to standardize the factors / predictors.</span>
+<span class="sd">    </span>
+<span class="sd">    n_jobs : int, default=1</span>
+<span class="sd">        The number of jobs to run in parallel. `n_jobs=-1` means using all processors.</span>
+<span class="sd">    </span>
+<span class="sd">    random_state : int or RandomState instance, default=None</span>
+<span class="sd">        A seed for controlling the randomness in breaking ties in nearest-neighbor search and finding random subsamples.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    ----------</span>
+<span class="sd">    A dictionary with the following keys:</span>
+<span class="sd">        - &quot;ranking&quot;: np.ndarray</span>
+<span class="sd">            Indices of the factors, ordered from most to least important, based on  cumulative variance that can be explained.</span>
+<span class="sd">        - &quot;explained_variance&quot;: np.ndarray</span>
+<span class="sd">            Cumulative variance explained by the factors in the ranking order.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    `Faiss` (Douze et al., 2024) is used for efficient nearest-neighbor search, with the approximate search (`approx_knn=True`) by the inverted file index (IVF). IVF reduces the search scope through first clustering data into Voronoi cells. To further accelerate, we also support the use of subsamples by specifying `n_mc`. Both random and twinning (Vakayil and Joseph, 2022) subsamples are available, where twinning subsamples provide better approximation for the full data. </span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Huang, C., &amp; Joseph, V. R. (2025). Factor Importance Ranking and Selection using Total Indices. Technometrics.</span>
+<span class="sd">    </span>
+<span class="sd">    Sobol&#39;, I. M. (2001). Global sensitivity indices for nonlinear mathematical models and their Monte Carlo estimates. Mathematics and computers in simulation, 55(1-3), 271-280.</span>
+<span class="sd">    </span>
+<span class="sd">    Broto, B., Bachoc, F., &amp; Depecker, M. (2020). Variance reduction for estimation of Shapley effects and adaptation to unknown input distribution. SIAM/ASA Journal on Uncertainty Quantification, 8(2), 693-716.</span>
+<span class="sd">    </span>
+<span class="sd">    Douze, M., Guzhva, A., Deng, C., Johnson, J., Szilvasy, G., Mazaré, P.E., Lomeli, M., Hosseini, L., &amp; Jégou, H., (2024). The Faiss library. arXiv preprint arXiv:2401.08281.</span>
+<span class="sd">    </span>
+<span class="sd">    Vakayil, A., &amp; Joseph, V. R. (2022). Data twinning. Statistical Analysis and Data Mining: The ASA Data Science Journal, 15(5), 598-610.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># argument check for random state</span>
+    <span class="n">rng</span> <span class="o">=</span> <span class="n">check_random_state</span><span class="p">(</span><span class="n">random_state</span><span class="p">)</span>  
+
+    <span class="c1"># check X and y, and preprocess</span>
+    <span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">_check_X_y_and_preprocess</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">rescale</span><span class="p">)</span>
+
+    <span class="c1"># check Monte Carlo subsample setting</span>
+    <span class="n">n_mc</span><span class="p">,</span> <span class="n">twin_mc</span> <span class="o">=</span> <span class="n">_check_mc_setting</span><span class="p">(</span><span class="n">n_mc</span><span class="p">,</span> <span class="n">twin_mc</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+    <span class="c1"># check knn setting </span>
+    <span class="n">n_knn</span><span class="p">,</span> <span class="n">approx_knn</span> <span class="o">=</span> <span class="n">_check_knn_setting</span><span class="p">(</span><span class="n">n_knn</span><span class="p">,</span> <span class="n">approx_knn</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+
+    <span class="c1"># get basic information for factor</span>
+    <span class="n">_</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span>
+    <span class="n">factor_nunique</span> <span class="o">=</span> <span class="n">X</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+    <span class="n">factor_non_constant</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">if</span> <span class="n">factor_nunique</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">]</span>
+
+    <span class="c1"># factor importance ranking by the cumulative variance that can be explained</span>
+    <span class="k">if</span> <span class="n">noise</span><span class="p">:</span>
+        <span class="n">noise_var</span> <span class="o">=</span> <span class="n">_exp_var_knn</span><span class="p">(</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">,</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">,</span>
+            <span class="n">subset</span> <span class="o">=</span> <span class="n">factor_non_constant</span><span class="p">,</span>
+            <span class="n">factor_nunique</span> <span class="o">=</span> <span class="n">factor_nunique</span><span class="p">,</span>
+            <span class="n">n_knn</span> <span class="o">=</span> <span class="n">n_knn</span><span class="p">,</span> 
+            <span class="n">approx_knn</span> <span class="o">=</span> <span class="n">approx_knn</span><span class="p">,</span>
+            <span class="n">n_mc</span> <span class="o">=</span> <span class="n">n_mc</span><span class="p">,</span> 
+            <span class="n">twin_mc</span> <span class="o">=</span> <span class="n">twin_mc</span><span class="p">,</span>
+            <span class="n">random_state</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mf">1e9</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">noise_var</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">y_var</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">y</span><span class="p">,</span><span class="n">ddof</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="n">noise_var</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">y_var</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;ranking&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">p</span><span class="p">),</span>
+            <span class="s2">&quot;explained_variance&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">p</span><span class="p">),</span>
+        <span class="p">}</span>
+    
+    <span class="n">factor_ranking</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">factor_explained_variance</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">subset</span> <span class="o">=</span> <span class="n">factor_non_constant</span>
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">subset</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">seeds</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mf">1e9</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">subset</span><span class="p">))</span>
+        <span class="n">nx_var</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="n">n_jobs</span><span class="p">,</span><span class="n">prefer</span><span class="o">=</span><span class="s1">&#39;threads&#39;</span><span class="p">)(</span><span class="n">delayed</span><span class="p">(</span><span class="n">_exp_var_knn</span><span class="p">)(</span>
+            <span class="n">X</span> <span class="o">=</span> <span class="n">X</span><span class="p">,</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="p">,</span>
+            <span class="n">subset</span> <span class="o">=</span> <span class="n">subset</span><span class="p">[:</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="n">subset</span><span class="p">[(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">):],</span>
+            <span class="n">factor_nunique</span> <span class="o">=</span> <span class="n">factor_nunique</span><span class="p">,</span>
+            <span class="n">n_knn</span> <span class="o">=</span> <span class="n">n_knn</span><span class="p">,</span> 
+            <span class="n">approx_knn</span> <span class="o">=</span> <span class="n">approx_knn</span><span class="p">,</span>
+            <span class="n">n_mc</span> <span class="o">=</span> <span class="n">n_mc</span><span class="p">,</span> 
+            <span class="n">twin_mc</span> <span class="o">=</span> <span class="n">twin_mc</span><span class="p">,</span>
+            <span class="n">random_state</span> <span class="o">=</span> <span class="n">seeds</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+        <span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">subset</span><span class="p">)))</span>
+        <span class="n">nx_var</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">nx_var</span><span class="p">)</span>
+        <span class="n">x_var</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">y_var</span> <span class="o">-</span> <span class="n">nx_var</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">remove_ind</span> <span class="o">=</span> <span class="n">subset</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">argmax</span><span class="p">(</span><span class="n">x_var</span><span class="p">)]</span>
+        <span class="n">factor_ranking</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">remove_ind</span><span class="p">)</span>
+        <span class="n">factor_explained_variance</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x_var</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">/</span> <span class="n">y_var</span><span class="p">)</span>
+        <span class="n">subset</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">remove_ind</span><span class="p">)</span>
+    
+    <span class="n">factor_ranking</span> <span class="o">=</span> <span class="n">factor_ranking</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">factor_explained_variance</span> <span class="o">=</span> <span class="n">factor_explained_variance</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">factor_nunique</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">factor_ranking</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">factor_explained_variance</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;ranking&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">factor_ranking</span><span class="p">),</span>
+        <span class="s2">&quot;explained_variance&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">factor_explained_variance</span><span class="p">)</span>
+    <span class="p">}</span></div>
 
 
 <div class="viewcode-block" id="FIRST">

@@ -5,13 +5,13 @@ from twinning import twin
 from math import comb
 from joblib import Parallel, delayed
 from pandas.api.types import is_numeric_dtype, is_bool_dtype
-from typing import List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 from sklearn.base import BaseEstimator
 from sklearn.feature_selection._base import SelectorMixin
 from sklearn.utils import check_random_state
 from sklearn.utils.validation import check_is_fitted
 
-__all__ = ['TotalSobolKNN', 'ShapleySobolKNN', 'FIRST', 'SelectByFIRST']
+__all__ = ['TotalSobolKNN', 'ShapleySobolKNN', 'FIRSTRank', 'FIRST', 'SelectByFIRST']
 
 def _check_X_y_and_preprocess(
         X:Union[pd.DataFrame, np.ndarray],
@@ -461,6 +461,156 @@ def ShapleySobolKNN(
         ssi[factor_non_constant] = ssi_non_constant
 
     return ssi 
+
+
+def FIRSTRank(
+        X:Union[pd.DataFrame, np.ndarray], 
+        y:Union[pd.Series, np.ndarray], 
+        noise:bool, 
+        n_knn:int = None, 
+        approx_knn:bool = False, 
+        n_mc:int = None, 
+        twin_mc:bool = False, 
+        rescale:bool = True,
+        n_jobs:int = 1,
+        random_state:Union[int,np.random.RandomState] = None,
+) -> Dict:
+    """Provides Factor Ranking via Cumulative Variance that can be explained. 
+
+    `FIRSTRank` provides factor ranking directly from scattered data via cumulative variance that can be explained. See Huang and Joseph (2025) for details.
+
+    Parameters
+    ----------
+    X : pd.DataFrame or np.ndarray
+        A pd.DataFrame or np.ndarray for the factors / predictors.
+    
+    y : pd.Series or np.ndarray
+        A pd.Series or np.ndarray for the responses. 
+    
+    noise : bool
+        A logical indicating whether the responses are noisy.
+    
+    n_knn : int, default=None
+        The number of nearest-neighbor for the inner loop conditional variance estimation. `n_knn=2` is recommended for regression, and `n_knn=3` for binary classification.
+    
+    approx_knn : bool, default=False
+        A logical indicating whether to use approximate nearest-neighbor search, otherwise exact search is used. It is supported when there are at least 10,000 data instances.
+    
+    n_mc : int, default=None 
+        The number of Monte Carlo samples for the outer loop expectation estimation.
+    
+    twin_mc : bool, default=False
+        A logical indicating whether to use twinning subsamples, otherwise random subsamples are used. It is supported when the reduction ratio is at least 2. 
+    
+    rescale : bool, default=True
+        A logical indicating whether to standardize the factors / predictors.
+    
+    n_jobs : int, default=1
+        The number of jobs to run in parallel. `n_jobs=-1` means using all processors.
+    
+    random_state : int or RandomState instance, default=None
+        A seed for controlling the randomness in breaking ties in nearest-neighbor search and finding random subsamples.
+
+    Returns
+    ----------
+    A dictionary with the following keys:
+        - "ranking": np.ndarray
+            Indices of the factors, ordered from most to least important, based on  cumulative variance that can be explained.
+        - "explained_variance": np.ndarray
+            Cumulative variance explained by the factors in the ranking order.
+
+    Notes
+    -----
+    `Faiss` (Douze et al., 2024) is used for efficient nearest-neighbor search, with the approximate search (`approx_knn=True`) by the inverted file index (IVF). IVF reduces the search scope through first clustering data into Voronoi cells. To further accelerate, we also support the use of subsamples by specifying `n_mc`. Both random and twinning (Vakayil and Joseph, 2022) subsamples are available, where twinning subsamples provide better approximation for the full data. 
+
+    References
+    ----------
+    Huang, C., & Joseph, V. R. (2025). Factor Importance Ranking and Selection using Total Indices. Technometrics.
+    
+    Sobol', I. M. (2001). Global sensitivity indices for nonlinear mathematical models and their Monte Carlo estimates. Mathematics and computers in simulation, 55(1-3), 271-280.
+    
+    Broto, B., Bachoc, F., & Depecker, M. (2020). Variance reduction for estimation of Shapley effects and adaptation to unknown input distribution. SIAM/ASA Journal on Uncertainty Quantification, 8(2), 693-716.
+    
+    Douze, M., Guzhva, A., Deng, C., Johnson, J., Szilvasy, G., Mazaré, P.E., Lomeli, M., Hosseini, L., & Jégou, H., (2024). The Faiss library. arXiv preprint arXiv:2401.08281.
+    
+    Vakayil, A., & Joseph, V. R. (2022). Data twinning. Statistical Analysis and Data Mining: The ASA Data Science Journal, 15(5), 598-610.
+
+    """
+
+    # argument check for random state
+    rng = check_random_state(random_state)  
+
+    # check X and y, and preprocess
+    X, y = _check_X_y_and_preprocess(X, y, rescale)
+
+    # check Monte Carlo subsample setting
+    n_mc, twin_mc = _check_mc_setting(n_mc, twin_mc, y)
+
+    # check knn setting 
+    n_knn, approx_knn = _check_knn_setting(n_knn, approx_knn, y)
+
+    # get basic information for factor
+    _, p = X.shape
+    factor_nunique = X.nunique().to_numpy()
+    factor_non_constant = [i for i in range(p) if factor_nunique[i] > 1]
+
+    # factor importance ranking by the cumulative variance that can be explained
+    if noise:
+        noise_var = _exp_var_knn(
+            X = X,
+            y = y,
+            subset = factor_non_constant,
+            factor_nunique = factor_nunique,
+            n_knn = n_knn, 
+            approx_knn = approx_knn,
+            n_mc = n_mc, 
+            twin_mc = twin_mc,
+            random_state = rng.randint(1e9, size=1)[0],
+        )
+    else:
+        noise_var = 0
+    y_var = max(np.var(y,ddof=1) - noise_var, 0)
+
+    if y_var == 0:
+        return {
+            "ranking": np.arange(p),
+            "explained_variance": np.zeros(p),
+        }
+    
+    factor_ranking = []
+    factor_explained_variance = []
+    subset = factor_non_constant
+    while len(subset) > 0:
+        seeds = rng.randint(1e9, size=len(subset))
+        nx_var = Parallel(n_jobs=n_jobs,prefer='threads')(delayed(_exp_var_knn)(
+            X = X,
+            y = y,
+            subset = subset[:i]+subset[(i+1):],
+            factor_nunique = factor_nunique,
+            n_knn = n_knn, 
+            approx_knn = approx_knn,
+            n_mc = n_mc, 
+            twin_mc = twin_mc,
+            random_state = seeds[i],
+        ) for i in range(len(subset)))
+        nx_var = np.array(nx_var)
+        x_var = np.maximum(y_var - nx_var, 0)
+        remove_ind = subset[np.argmax(x_var)]
+        factor_ranking.append(remove_ind)
+        factor_explained_variance.append(x_var.max() / y_var)
+        subset.remove(remove_ind)
+    
+    factor_ranking = factor_ranking[::-1]
+    factor_explained_variance = factor_explained_variance[::-1][1:] + [1]
+    for i in range(p):
+        if factor_nunique[i] == 1:
+            factor_ranking.append(i)
+            factor_explained_variance.append(1)
+    
+    return {
+        "ranking": np.array(factor_ranking),
+        "explained_variance": np.array(factor_explained_variance)
+    }
 
 def FIRST(
         X:Union[pd.DataFrame, np.ndarray], 

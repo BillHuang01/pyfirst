@@ -101,7 +101,10 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#pyfirst.pyfirst.ShapleySobolKNN" title="pyfirst.pyfirst.ShapleySobolKNN"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ShapleySobolKNN</span></code></a>(→ numpy.ndarray)</p></td>
 <td><p>Estimating Shapley Sobol' Effect from Data</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pyfirst.pyfirst.FIRST" title="pyfirst.pyfirst.FIRST"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FIRST</span></code></a>(→ numpy.ndarray)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pyfirst.pyfirst.FIRSTRank" title="pyfirst.pyfirst.FIRSTRank"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FIRSTRank</span></code></a>(→ Dict)</p></td>
+<td><p>Provides Factor Ranking via Cumulative Variance that can be explained.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pyfirst.pyfirst.FIRST" title="pyfirst.pyfirst.FIRST"><code class="xref py py-obj docutils literal notranslate"><span class="pre">FIRST</span></code></a>(→ numpy.ndarray)</p></td>
 <td><p>Factor Importance Ranking and Selection using Total (Sobol') indices</p></td>
 </tr>
 </tbody>
@@ -176,6 +179,55 @@
 <p>Huang, C., &amp; Joseph, V. R. (2025). Factor Importance Ranking and Selection using Total Indices. Technometrics.</p>
 <p>Owen, A. B. (2014), “Sobol’indices and Shapley value,” SIAM/ASA Journal on Uncertainty Quantification, 2, 245–251.</p>
 <p>Song, E., Nelson, B. L., &amp; Staum, J. (2016), “Shapley effects for global sensitivity analysis: Theory and computation,” SIAM/ASA Journal on Uncertainty Quantification, 4, 1060-1083.</p>
+<p>Broto, B., Bachoc, F., &amp; Depecker, M. (2020). Variance reduction for estimation of Shapley effects and adaptation to unknown input distribution. SIAM/ASA Journal on Uncertainty Quantification, 8(2), 693-716.</p>
+<p>Douze, M., Guzhva, A., Deng, C., Johnson, J., Szilvasy, G., Mazaré, P.E., Lomeli, M., Hosseini, L., &amp; Jégou, H., (2024). The Faiss library. arXiv preprint arXiv:2401.08281.</p>
+<p>Vakayil, A., &amp; Joseph, V. R. (2022). Data twinning. Statistical Analysis and Data Mining: The ASA Data Science Journal, 15(5), 598-610.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pyfirst.pyfirst.FIRSTRank">
+<span class="sig-prename descclassname"><span class="pre">pyfirst.pyfirst.</span></span><span class="sig-name descname"><span class="pre">FIRSTRank</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">X</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.Series</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">noise</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_knn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">approx_knn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_mc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">twin_mc</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rescale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_jobs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_state</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">numpy.random.RandomState</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span></span></span><a class="reference internal" href="../../../_modules/pyfirst/pyfirst.html#FIRSTRank"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pyfirst.pyfirst.FIRSTRank" title="Link to this definition"></a></dt>
+<dd><p>Provides Factor Ranking via Cumulative Variance that can be explained.</p>
+<p><cite>FIRSTRank</cite> provides factor ranking directly from scattered data via cumulative variance that can be explained. See Huang and Joseph (2025) for details.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>X</strong> (<em>pd.DataFrame</em><em> or </em><em>np.ndarray</em>) – A pd.DataFrame or np.ndarray for the factors / predictors.</p></li>
+<li><p><strong>y</strong> (<em>pd.Series</em><em> or </em><em>np.ndarray</em>) – A pd.Series or np.ndarray for the responses.</p></li>
+<li><p><strong>noise</strong> (<em>bool</em>) – A logical indicating whether the responses are noisy.</p></li>
+<li><p><strong>n_knn</strong> (<em>int</em><em>, </em><em>default=None</em>) – The number of nearest-neighbor for the inner loop conditional variance estimation. <cite>n_knn=2</cite> is recommended for regression, and <cite>n_knn=3</cite> for binary classification.</p></li>
+<li><p><strong>approx_knn</strong> (<em>bool</em><em>, </em><em>default=False</em>) – A logical indicating whether to use approximate nearest-neighbor search, otherwise exact search is used. It is supported when there are at least 10,000 data instances.</p></li>
+<li><p><strong>n_mc</strong> (<em>int</em><em>, </em><em>default=None</em>) – The number of Monte Carlo samples for the outer loop expectation estimation.</p></li>
+<li><p><strong>twin_mc</strong> (<em>bool</em><em>, </em><em>default=False</em>) – A logical indicating whether to use twinning subsamples, otherwise random subsamples are used. It is supported when the reduction ratio is at least 2.</p></li>
+<li><p><strong>rescale</strong> (<em>bool</em><em>, </em><em>default=True</em>) – A logical indicating whether to standardize the factors / predictors.</p></li>
+<li><p><strong>n_jobs</strong> (<em>int</em><em>, </em><em>default=1</em>) – The number of jobs to run in parallel. <cite>n_jobs=-1</cite> means using all processors.</p></li>
+<li><p><strong>random_state</strong> (<em>int</em><em> or </em><em>RandomState instance</em><em>, </em><em>default=None</em>) – A seed for controlling the randomness in breaking ties in nearest-neighbor search and finding random subsamples.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><dl class="simple">
+<dt>“ranking”: np.ndarray</dt><dd><p>Indices of the factors, ordered from most to least important, based on  cumulative variance that can be explained.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt>”explained_variance”: np.ndarray</dt><dd><p>Cumulative variance explained by the factors in the ranking order.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A dictionary with the following keys</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p><cite>Faiss</cite> (Douze et al., 2024) is used for efficient nearest-neighbor search, with the approximate search (<cite>approx_knn=True</cite>) by the inverted file index (IVF). IVF reduces the search scope through first clustering data into Voronoi cells. To further accelerate, we also support the use of subsamples by specifying <cite>n_mc</cite>. Both random and twinning (Vakayil and Joseph, 2022) subsamples are available, where twinning subsamples provide better approximation for the full data.</p>
+<p class="rubric">References</p>
+<p>Huang, C., &amp; Joseph, V. R. (2025). Factor Importance Ranking and Selection using Total Indices. Technometrics.</p>
+<p>Sobol’, I. M. (2001). Global sensitivity indices for nonlinear mathematical models and their Monte Carlo estimates. Mathematics and computers in simulation, 55(1-3), 271-280.</p>
 <p>Broto, B., Bachoc, F., &amp; Depecker, M. (2020). Variance reduction for estimation of Shapley effects and adaptation to unknown input distribution. SIAM/ASA Journal on Uncertainty Quantification, 8(2), 693-716.</p>
 <p>Douze, M., Guzhva, A., Deng, C., Johnson, J., Szilvasy, G., Mazaré, P.E., Lomeli, M., Hosseini, L., &amp; Jégou, H., (2024). The Faiss library. arXiv preprint arXiv:2401.08281.</p>
 <p>Vakayil, A., &amp; Joseph, V. R. (2022). Data twinning. Statistical Analysis and Data Mining: The ASA Data Science Journal, 15(5), 598-610.</p>
