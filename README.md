@@ -86,6 +86,20 @@ ShapleySobolKNN(X, y, noise=True)
 ```
 For more details and applications, please see [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)][14] or [API documentation][15]. 
 
+### FIRSTRank
+
+This module also provides the function ``FIRSTRank`` for factor importance ranking via maximizing cumulative variance that can be explained. Please see [Huang and Joseph (2025)][1] for details.
+
+```python
+from pyfirst import ShapleySobolKNN
+from sklearn.datasets import make_friedman1
+
+X, y = make_friedman1(n_samples=10000, n_features=5, noise=1.0, random_state=43)
+
+FIRSTRank(X, y, noise=True)
+```
+For more details and applications, please see [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)][18] or [API documentation][19]. 
+
 ## References
 
 Huang, C., & Joseph, V. R. (2025). Factor Importance Ranking and Selection using Total Indices. Technometrics.
@@ -131,3 +145,5 @@ If you find this module useful, please consider citing
 [15]: https://pyfirst.readthedocs.io/en/latest/autoapi/pyfirst/index.html#pyfirst.ShapleySobolKNN
 [16]: https://epubs.siam.org/doi/10.1137/130936233
 [17]: https://epubs.siam.org/doi/10.1137/15M1048070
+[18]: https://colab.research.google.com/github/BillHuang01/pyfirst/blob/main/docs/FIRSTRank.ipynb
+[19]: https://pyfirst.readthedocs.io/en/latest/autoapi/pyfirst/index.html#pyfirst.FIRSTRank
